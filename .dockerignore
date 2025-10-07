@@ -1,0 +1,22 @@
+# IDE and system files
+.idea
+.vscode
+*.iml
+
+# Build and gradle caches
+.gradle
+build
+out
+
+# Git and logs
+.git
+.gitignore
+*.log
+
+# Node/Frontend (если есть)
+node_modules
+dist
+
+# Docker itself
+Dockerfile
+.dockerignore

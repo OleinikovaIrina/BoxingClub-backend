@@ -1,0 +1,26 @@
+package de.oleinikova.boxingclub.backend.membership.persistence;
+
+import de.oleinikova.boxingclub.backend.membership.entity.Membership;
+import de.oleinikova.boxingclub.backend.membership.entity.MembershipDuration;
+import de.oleinikova.boxingclub.backend.membership.entity.MembershipStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.UUID;
+
+
+public interface MembershipRepository extends JpaRepository<Membership, UUID> {
+
+
+    List<Membership> findAllByUser_LastNameIgnoreCase(String appUserLastName);
+
+    List<Membership> findAllByUser_EmailIgnoreCase(String email);
+
+    List<Membership> findByUser_Id(UUID userId);
+
+    boolean existsByUser_IdAndDurationAndStatus(
+            UUID userId,
+            MembershipDuration duration,
+            MembershipStatus status
+    );
+}

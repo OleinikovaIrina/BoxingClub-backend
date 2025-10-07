@@ -1,37 +1,41 @@
-HELP.md
-.gradle
+### Gradle
+.gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+### Logs
+*.log
 
-### IntelliJ IDEA ###
-.idea
+### OS junk
+.DS_Store
+Thumbs.db
+
+### IDEs
+.idea/
+.vscode/
 *.iws
 *.iml
 *.ipr
 out/
-!**/src/main/**/out/
-!**/src/test/**/out/
+bin/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+### Node/Frontend
+node_modules/
+dist/
 
-### VS Code ###
-.vscode/
+### Test reports / Coverage (optional)
+test-results/
+jacoco/
+
+### Secrets & local overrides
+.env
+.env.*
+*.keystore
+*.pem
+*.p12
+secrets.*
+
+# Локальные настройки Spring
+application-*.local.properties
+
+
