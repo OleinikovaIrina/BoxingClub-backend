@@ -97,6 +97,22 @@ public class GlobalExceptionHandler {
         log.warn("400 Bad request: {}", ExceptionUtils.getMessage(ex));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidToken(
+            InvalidTokenException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto body = error(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                List.of(),
+                request
+        );
+
+        log.warn("400 Invalid token: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
 
     // --- 404 ---
     @ExceptionHandler({  NoResourceFoundException.class,NoHandlerFoundException.class, ResourceNotFoundException.class })

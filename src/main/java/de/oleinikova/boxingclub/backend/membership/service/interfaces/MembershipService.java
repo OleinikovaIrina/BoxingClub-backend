@@ -2,6 +2,7 @@ package de.oleinikova.boxingclub.backend.membership.service.interfaces;
 
 import de.oleinikova.boxingclub.backend.membership.dto.request.MembershipCreateRequestDto;
 import de.oleinikova.boxingclub.backend.membership.dto.response.MembershipResponseDto;
+import de.oleinikova.boxingclub.backend.membership.entity.Membership;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,4 +19,6 @@ public interface MembershipService {
     MembershipResponseDto rejectMembership(UUID membershipId);
 
     MembershipResponseDto approveMembership(UUID membershipId);
+
+    List<MembershipResponseDto> getActiveMemberships();
 }

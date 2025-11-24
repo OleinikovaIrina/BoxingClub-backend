@@ -149,4 +149,11 @@ public class MembershipServiceImpl implements MembershipService {
         return membershipMapper.toDto(m);
     }
 
+    @Override
+    public List<MembershipResponseDto> getActiveMemberships() {
+        return repository.findCurrentlyActiveMemberships()
+                .stream()
+                .map(membershipMapper ::toDto)
+                .toList();
+    }
 }

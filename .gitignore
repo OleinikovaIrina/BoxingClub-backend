@@ -30,6 +30,7 @@ jacoco/
 ### Secrets & local overrides
 .env
 .env.*
+!*.env.example
 *.keystore
 *.pem
 *.p12

@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -61,10 +62,18 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails user = userDetailsService.loadUserByUsername(username);
             if (jwtService.isValid(token, user)) {
+                //ВРЕМЕННО!!
+                System.out.println(">>> [JWT] VALID token for user=" + username
+                        + " | authorities=" + user.getAuthorities());
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
+                //ВРЕМЕННО!!
+                System.out.println(">>> [JWT] Context set: "
+                        + SecurityContextHolder.getContext().getAuthentication());
+            } else {
+                System.out.println(">>> [JWT] INVALID token for user=" + username);
             }
         }
 
@@ -80,8 +89,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if (uri.startsWith("/swagger-ui") || uri.startsWith("/v3/api-docs")) return true;
         // Логин
         if (uri.equals("/api/auth/login")) return true;
-        if (uri.equals("/api/users/register")) return true;
-        if (uri.equals("/api/users/confirm")) return true;
+        if (uri.equals("/api/auth/register")) return true;
+        if (uri.equals("/api/auth/confirm")) return true;
         return false;
     }
 }

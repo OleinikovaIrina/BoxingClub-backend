@@ -3,6 +3,7 @@ package de.oleinikova.boxingclub.backend.membership.controller.interfaces;
 import de.oleinikova.boxingclub.backend.membership.dto.response.MembershipResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -17,5 +18,8 @@ public interface AdminMembershipApiSwaggerDoc {
 
     @Operation(summary = "Approve a membership")
     MembershipResponseDto approveMembership(UUID membershipId);
+
+    @Operation(summary = "Find   currently active memberships")
+    List<MembershipResponseDto> getActiveMemberships();
 
 }

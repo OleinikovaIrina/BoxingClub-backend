@@ -26,27 +26,28 @@ public class JwtService {
             @Value("${security.jwt.secret}") String secretBase64,
             @Value("${security.jwt.access-exp-min}") long expMin
     ) {
-        // Expect Base64-encoded secret (>= 32 bytes BEFORE encoding)
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretBase64));
         this.accessExpMillis = expMin * 60_000L;
     }
 
-    /**
-     * Create access token; subject = username (email).
-     */
+    /** Создание токена: subject=email, claim=role */
     public String generateToken(UserDetails user) {
         Instant now = Instant.now();
+        String role = user.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority())
+                .orElse("ROLE_USER");
+
         return Jwts.builder()
                 .setSubject(user.getUsername())
+                .claim("role", role)
                 .setIssuedAt(Date.from(now))
                 .setExpiration(new Date(now.toEpochMilli() + accessExpMillis))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    /**
-     * Extract username (subject) from token.
-     */
+    /** Извлекаем email */
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -56,9 +57,17 @@ public class JwtService {
                 .getSubject();
     }
 
-    /**
-     * Validate signature, subject and expiration.
-     */
+    /** Извлекаем роль (для отладки или тестов) */
+    public String extractRole(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
+    }
+
+    /** Проверка токена */
     public boolean isValid(String token, UserDetails user) {
         try {
             Jws<Claims> jws = Jwts.parserBuilder()

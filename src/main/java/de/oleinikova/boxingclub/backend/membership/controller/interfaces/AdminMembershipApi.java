@@ -9,19 +9,20 @@ import java.util.UUID;
 
 @RequestMapping("/api/admin/memberships")
 public interface AdminMembershipApi extends AdminMembershipApiSwaggerDoc {
-
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN','TRAINER')")
     @GetMapping
     List<MembershipResponseDto> getMembershipByLastName(@RequestParam String lastName);
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/reject")
     MembershipResponseDto rejectMembership(@PathVariable("id") UUID membershipId);
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/approve")
     MembershipResponseDto approveMembership(@PathVariable("id") UUID membershipId);
+
+    @Override
+    @GetMapping("/active")
+    List<MembershipResponseDto> getActiveMemberships();
+
 }

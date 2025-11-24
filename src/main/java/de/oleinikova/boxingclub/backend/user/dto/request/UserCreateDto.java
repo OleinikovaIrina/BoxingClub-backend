@@ -34,7 +34,7 @@ public record UserCreateDto(
         )
         @Schema(
                 description = "new User password",
-                example = "Box_club2025!"
+                example = " "
         )
         String password
         )

@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -19,13 +20,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @Profile("dev")
-public class ConfirmationServiceDevImpl implements ConfirmationService {
+public class ConfirmationServiceImpl implements ConfirmationService {
 
     private final ConfirmationCodeRepository repo;
 
-    @Value("${confirmation.expiration.minutes:90}")
+    @Value("${passwordReset.expiration.minutes:90}")
     private int ttlMinutes;
-
     @Transactional
     @Override
     public String generateConfirmationCode(AppUser appUser) {
@@ -45,10 +45,15 @@ public class ConfirmationServiceDevImpl implements ConfirmationService {
         return generateConfirmationCode(appUser);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public AppUser confirmAndConsume(String code) {
-        var token = repo.findByCode(code).orElseThrow(() -> new IllegalArgumentException("Invalid confirmation code"));
+        log.info("Confirm request received with code='{}' (class={})", code, code.getClass().getName());
+        log.info("Code: {}", code);
+        var token = repo.findByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid  code"));
+        log.info("Token found: {}", token);
+        log.info("User: {}", token.getUser());
 
         if (token.getStatus() != ConfirmationTokenStatus.PENDING)
             throw new IllegalStateException("Confirmation code already used");

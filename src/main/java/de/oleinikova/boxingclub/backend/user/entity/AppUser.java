@@ -26,7 +26,6 @@ public class AppUser {
     @UuidGenerator
     private UUID id;
 
-
     @Column(nullable = false, length = 120)
     private String firstName;
 

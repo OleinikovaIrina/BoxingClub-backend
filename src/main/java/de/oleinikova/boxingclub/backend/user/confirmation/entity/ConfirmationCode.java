@@ -40,9 +40,4 @@ public class ConfirmationCode {
     @Column(nullable = false)
     private LocalDateTime expiresAt;
 
-    @PrePersist
-    void onCreate() {
-        if (createdAt == null) createdAt = LocalDateTime.now();
-    }
-
 }

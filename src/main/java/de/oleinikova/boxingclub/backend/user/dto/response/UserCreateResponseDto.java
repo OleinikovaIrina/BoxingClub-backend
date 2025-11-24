@@ -26,7 +26,7 @@ public record UserCreateResponseDto (
         Role role,
 
         @Schema(
-                description = "Flag indicating if the confirmation email was resent. True if the email was resent due to unconfirmed status; false if sent initially.",
+                description = "Flag indicating if the passwordReset email was resent. True if the email was resent due to unconfirmed status; false if sent initially.",
                 example = "true",
                 accessMode = Schema.AccessMode.READ_ONLY
         )

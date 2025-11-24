@@ -3,7 +3,9 @@ package de.oleinikova.boxingclub.backend.membership.controller.impl;
 import de.oleinikova.boxingclub.backend.membership.controller.interfaces.AdminMembershipApi;
 import de.oleinikova.boxingclub.backend.membership.dto.response.MembershipResponseDto;
 import de.oleinikova.boxingclub.backend.membership.service.interfaces.MembershipService;
+import de.oleinikova.boxingclub.backend.membership.util.MembershipMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -19,9 +21,11 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class AdminMembershipControllerImpl implements AdminMembershipApi {
 
     private final MembershipService membershipService;
+    private  final MembershipMapper membershipMapper;
 
     @Override
     public List<MembershipResponseDto> getMembershipByLastName(String lastName) {
@@ -37,4 +41,10 @@ public class AdminMembershipControllerImpl implements AdminMembershipApi {
     public MembershipResponseDto approveMembership(UUID membershipId) {
         return membershipService.approveMembership(membershipId);
     }
+
+    @Override
+    public List<MembershipResponseDto> getActiveMemberships() {
+        return membershipService.getActiveMemberships();
+    }
 }
+

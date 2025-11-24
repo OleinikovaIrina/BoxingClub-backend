@@ -25,6 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         AppUser u = userRepo.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+        System.out.println(">>> [DEBUG] Loaded user: " + u.getEmail() + ", role=" + u.getRole());
 
         Collection<? extends GrantedAuthority> authorities =
                 Set.of(new SimpleGrantedAuthority(u.getRole().name()));

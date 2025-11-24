@@ -37,4 +37,4 @@ private  final MembershipService membershipService;
     public MembershipResponseDto cancelMembership(UUID membershipId) {
         return membershipService.cancelMembership(membershipId);
     }
-}
+    }

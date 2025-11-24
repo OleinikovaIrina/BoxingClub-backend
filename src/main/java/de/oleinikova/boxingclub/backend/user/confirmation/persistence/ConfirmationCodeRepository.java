@@ -9,9 +9,9 @@ import java.util.UUID;
 
 public interface ConfirmationCodeRepository extends JpaRepository<ConfirmationCode, UUID> {
 
-    Optional<ConfirmationCode> findByCode(String code);
+    Optional<ConfirmationCode> findByCode (String code);
 
     void deleteByUser_Id(UUID userId);
 
-    void deleteByExpiresAtBefore(LocalDateTime time);
+    void deleteByExpiresAtBefore(LocalDateTime expiresAtBefore);
 }
