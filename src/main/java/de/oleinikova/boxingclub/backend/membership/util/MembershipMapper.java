@@ -7,9 +7,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
+// Business fields (user, status, dates) are set in service layer intentionally
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface MembershipMapper {
-
+    @Mapping(target = "membershipId", source = "id")
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "firstName", source = "user.firstName")
     @Mapping(target = "lastName", source = "user.lastName")

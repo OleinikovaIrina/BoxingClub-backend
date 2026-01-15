@@ -21,4 +21,13 @@ public interface MembershipService {
     MembershipResponseDto approveMembership(UUID membershipId);
 
     List<MembershipResponseDto> getActiveMemberships();
+
+    // ===== adapter methods (for controllers) =====
+
+    MembershipResponseDto createMembershipByEmail(String email, MembershipCreateRequestDto dto);
+
+    List<MembershipResponseDto> getMembershipsByEmail(String email);
+
+    MembershipResponseDto cancelMembershipByEmail(UUID membershipId, String email
+    );
 }

@@ -1,5 +1,6 @@
 package de.oleinikova.boxingclub.backend.user.service.impl;
 
+import de.oleinikova.boxingclub.backend.mail.EmailService;
 import de.oleinikova.boxingclub.backend.user.confirmation.interfaces.ConfirmationService;
 import de.oleinikova.boxingclub.backend.user.dto.request.UserCreateDto;
 import de.oleinikova.boxingclub.backend.user.dto.response.UserCreateResponseDto;
@@ -27,6 +28,7 @@ public class UserRegisterServiceImpl implements UserRegisterService {
     private final AppUserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
     private final ConfirmationService confirmationService;
+    private final EmailService emailService;
 
     private String normalizeEmail(String raw) {
         return raw == null ? null : raw.trim().toLowerCase(Locale.ROOT);
@@ -42,7 +44,9 @@ public class UserRegisterServiceImpl implements UserRegisterService {
         if (existing.isPresent()) {
             final AppUser ex = existing.get();
             if (ex.getConfirmationStatus() == ConfirmationStatus.UNCONFIRMED) {
-                confirmationService.regenerateCode(ex);
+                String token = confirmationService.regenerateCode(ex);
+                sendConfirmationEmail(ex,token);
+
                 return new UserCreateResponseDto(
                         ex.getId(),
                         ex.getEmail(),
@@ -62,7 +66,8 @@ public class UserRegisterServiceImpl implements UserRegisterService {
         appUser.setEnabled(true);
         AppUser saved = userRepo.save(appUser);
 
-        confirmationService.generateConfirmationCode(saved);
+        String token = confirmationService.generateConfirmationCode(saved);
+        sendConfirmationEmail(saved, token);
 
         return new UserCreateResponseDto(
                 saved.getId(),
@@ -84,6 +89,29 @@ public class UserRegisterServiceImpl implements UserRegisterService {
                 updated.getRole(),
                 updated.getConfirmationStatus()
         );
+    }
+
+    private void sendConfirmationEmail(AppUser user, String token) {
+        String link = "http://localhost:8081/api/auth/confirm?code=" + token;
+
+
+        String html = "<p>Hello " + user.getFirstName() + ",</p>"
+                + "<p>Thank you for registering in <b>BoxingClub</b>!</p>"
+                + "<p>Please confirm your email by clicking the link below:</p>"
+                + "<p><a href=\"" + link + "\">CONFIRM ACCOUNT</a></p>"
+                + "<p>The link is valid for 24 hours.</p>";
+
+        try {
+            emailService.sendHtmlMail(
+                    user.getEmail(),
+                    "Boxing Club - Confirm your account",
+
+                    html
+            );
+            log.info("Confirmation email sent to {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send confirmation email", e);
+        }
     }
 }
 

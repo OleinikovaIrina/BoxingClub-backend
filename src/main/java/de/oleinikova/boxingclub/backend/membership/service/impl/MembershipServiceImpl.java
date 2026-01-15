@@ -16,7 +16,7 @@ import de.oleinikova.boxingclub.backend.user.persistence.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -47,7 +47,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         Membership entity = membershipMapper.toEntity(dto);
 
-        if (dto.iban() != null && !dto.iban().isBlank()){
+        if (dto.iban() != null && !dto.iban().isBlank()) {
             entity.setIban(dto.iban().replaceAll("\\s+", "").toUpperCase());
         }
 
@@ -153,7 +153,29 @@ public class MembershipServiceImpl implements MembershipService {
     public List<MembershipResponseDto> getActiveMemberships() {
         return repository.findCurrentlyActiveMemberships()
                 .stream()
-                .map(membershipMapper ::toDto)
+                .map(membershipMapper::toDto)
                 .toList();
+    }
+
+    @Transactional
+    public MembershipResponseDto createMembershipByEmail(String email, MembershipCreateRequestDto dto) {
+        AppUser user = appUserRepository.findByEmailIgnoreCase(email).orElseThrow(UserNotFoundException::new);
+        return createMembership(user.getId(), dto);
+    }
+
+    @Transactional
+    public List<MembershipResponseDto> getMembershipsByEmail(String email) {
+        AppUser user = appUserRepository.findByEmailIgnoreCase(email).orElseThrow(UserNotFoundException::new);
+        return getMembershipsByUserId(user.getId());
+    }
+
+    @Transactional
+    public MembershipResponseDto cancelMembershipByEmail(UUID membershipId, String email) {
+        AppUser user = appUserRepository.findByEmailIgnoreCase(email).orElseThrow(UserNotFoundException::new);
+        Membership membership = repository.findById(membershipId).orElseThrow(MembershipNotFoundException::new);
+        if (!membership.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("Not your membership");
+        }
+        return cancelMembership(membershipId);
     }
 }

@@ -19,7 +19,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Profile("dev")
 public class ConfirmationServiceImpl implements ConfirmationService {
 
     private final ConfirmationCodeRepository repo;
