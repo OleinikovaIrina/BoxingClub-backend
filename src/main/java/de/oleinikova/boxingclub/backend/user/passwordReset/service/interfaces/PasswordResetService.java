@@ -5,7 +5,7 @@ import de.oleinikova.boxingclub.backend.user.entity.AppUser;
 
 public interface PasswordResetService {
 
-    PasswordResetToken createPasswordResetToken(String email);
+    void createPasswordResetToken(String email);
 
     boolean validatePasswordResetToken(String tokenValue);
 

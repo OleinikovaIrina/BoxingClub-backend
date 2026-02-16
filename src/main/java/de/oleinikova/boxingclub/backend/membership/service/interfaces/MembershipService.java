@@ -22,6 +22,9 @@ public interface MembershipService {
 
     List<MembershipResponseDto> getActiveMemberships();
 
+    List<MembershipResponseDto> getPendingMemberships();
+
+
     // ===== adapter methods (for controllers) =====
 
     MembershipResponseDto createMembershipByEmail(String email, MembershipCreateRequestDto dto);

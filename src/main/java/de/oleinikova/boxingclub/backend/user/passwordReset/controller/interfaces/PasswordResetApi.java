@@ -1,12 +1,11 @@
 package de.oleinikova.boxingclub.backend.user.passwordReset.controller.interfaces;
 
+import de.oleinikova.boxingclub.backend.user.passwordReset.dto.request.PasswordResetRequest;
 import de.oleinikova.boxingclub.backend.user.passwordReset.entity.PasswordResetToken;
 import jakarta.annotation.security.PermitAll;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/password")
 public interface PasswordResetApi extends PasswordResetApiSwaggerDoc{
@@ -21,5 +20,5 @@ public interface PasswordResetApi extends PasswordResetApiSwaggerDoc{
 
     @Override
     @PostMapping("/reset")
-    ResponseEntity<Void> resetPassword(@RequestParam("token") String tokenValue,@RequestParam("newPassword") String newPassword);
+    ResponseEntity<Void> resetPassword(@RequestBody @Valid PasswordResetRequest request);
 }

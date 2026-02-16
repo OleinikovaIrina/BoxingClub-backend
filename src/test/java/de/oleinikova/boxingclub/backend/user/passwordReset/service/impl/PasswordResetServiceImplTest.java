@@ -2,12 +2,11 @@ package de.oleinikova.boxingclub.backend.user.passwordReset.service.impl;
 
 import de.oleinikova.boxingclub.backend.exception.InvalidTokenException;
 import de.oleinikova.boxingclub.backend.exception.TokenExpiredException;
+import de.oleinikova.boxingclub.backend.mail.EmailService;
 import de.oleinikova.boxingclub.backend.user.entity.AppUser;
-import de.oleinikova.boxingclub.backend.user.exception.UserNotFoundException;
 import de.oleinikova.boxingclub.backend.user.passwordReset.entity.PasswordResetStatus;
 import de.oleinikova.boxingclub.backend.user.passwordReset.entity.PasswordResetToken;
 import de.oleinikova.boxingclub.backend.user.passwordReset.persistence.PasswordResetRepository;
-import de.oleinikova.boxingclub.backend.user.passwordReset.service.interfaces.PasswordResetService;
 import de.oleinikova.boxingclub.backend.user.persistence.AppUserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,6 +34,8 @@ class PasswordResetServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock private EmailService emailService;
+
     @InjectMocks
     private PasswordResetServiceImpl passwordResetService;
 
@@ -43,35 +44,15 @@ class PasswordResetServiceImplTest {
         String email = "test@mail.com";
         AppUser user = new AppUser();
         user.setEmail(email);
+
         when(userRepository.findByEmailIgnoreCase(email))
                 .thenReturn(Optional.of(user));
-        PasswordResetToken token = new PasswordResetToken();
-        token.setUser(user);
-        token.setExpiresAt(LocalDateTime.now().plusHours(1));
-        when(tokenRepository.save(any(PasswordResetToken.class)))
-                .thenReturn(token);
 
-        PasswordResetToken result = passwordResetService.createPasswordResetToken(email);
+        passwordResetService.createPasswordResetToken(email);
 
-        assertNotNull(result);
-        assertEquals(user, result.getUser());
-        assertTrue(result.getExpiresAt().isAfter(LocalDateTime.now()));
         verify(userRepository).findByEmailIgnoreCase(email);
         verify(tokenRepository).deleteByUser(user);
         verify(tokenRepository).save(any(PasswordResetToken.class));
-    }
-
-    @Test
-    void shouldThrowException_WhenUserNotFound() {
-        String email = "test@mail.com";
-        AppUser user = new AppUser();
-        user.setEmail(email);
-        when(userRepository.findByEmailIgnoreCase(email)).thenReturn(Optional.empty());
-
-        assertThrows(UserNotFoundException.class, () -> passwordResetService.createPasswordResetToken(email));
-
-        verify(tokenRepository, never()).save(any());
-        verify(tokenRepository, never()).deleteByUser(any());
     }
 
     @Test
@@ -81,7 +62,7 @@ class PasswordResetServiceImplTest {
 
         PasswordResetToken token = new PasswordResetToken();
         token.setUser(user);
-        token.setExpiresAt(LocalDateTime.now().plusHours(1));
+        token.setExpiresAt(Instant.now().plusSeconds(3600L));
         token.setStatus(PasswordResetStatus.PENDING);
         when(tokenRepository.findByToken(tokenValue))
                 .thenReturn(Optional.of(token));
@@ -109,7 +90,7 @@ class PasswordResetServiceImplTest {
 
         PasswordResetToken token = new PasswordResetToken();
         token.setUser(user);
-        token.setExpiresAt(LocalDateTime.now().minusHours(1));
+        token.setExpiresAt(Instant.now().minusSeconds(3600L));
         token.setStatus(PasswordResetStatus.PENDING);
 
         when(tokenRepository.findByToken(tokenValue))
@@ -126,7 +107,7 @@ class PasswordResetServiceImplTest {
 
         PasswordResetToken token = new PasswordResetToken();
         token.setUser(user);
-        token.setExpiresAt(LocalDateTime.now().plusHours(1));
+        token.setExpiresAt(Instant.now().plusSeconds(3600L));
         token.setStatus(PasswordResetStatus.CONFIRMED);
 
         when(tokenRepository.findByToken(tokenValue))
@@ -144,7 +125,7 @@ class PasswordResetServiceImplTest {
 
         PasswordResetToken token = new PasswordResetToken();
         token.setUser(user);
-        token.setExpiresAt(LocalDateTime.now().plusHours(1));
+        token.setExpiresAt(Instant.now().plusSeconds(3600L));
         token.setStatus(PasswordResetStatus.PENDING);
 
         when(tokenRepository.findByToken(tokenValue))

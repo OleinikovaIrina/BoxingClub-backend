@@ -20,11 +20,12 @@ public interface MembershipRepository extends JpaRepository<Membership, UUID> {
     List<Membership> findByUser_Id(UUID userId);
 
     @Query("""
-            SELECT m
-            FROM Membership  m
-            WHERE m.startDate <= CURRENT_DATE 
-            AND ( m.endDate IS NULL OR m.endDate >= CURRENT_DATE)
-            """)
+    SELECT m
+    FROM Membership m
+    WHERE m.status = de.oleinikova.boxingclub.backend.membership.entity.MembershipStatus.APPROVED
+      AND m.startDate <= CURRENT_DATE
+      AND (m.endDate IS NULL OR m.endDate >= CURRENT_DATE)
+""")
     List<Membership> findCurrentlyActiveMemberships();
 
     boolean existsByUser_IdAndDurationAndStatus(
@@ -32,4 +33,6 @@ public interface MembershipRepository extends JpaRepository<Membership, UUID> {
             MembershipDuration duration,
             MembershipStatus status
     );
+
+    List<Membership> findByStatus(MembershipStatus membershipStatus);
 }

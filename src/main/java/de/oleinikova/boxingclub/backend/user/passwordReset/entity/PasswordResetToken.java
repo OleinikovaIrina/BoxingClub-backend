@@ -2,10 +2,9 @@ package de.oleinikova.boxingclub.backend.user.passwordReset.entity;
 
 import de.oleinikova.boxingclub.backend.user.entity.AppUser;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -29,10 +28,10 @@ public class PasswordResetToken {
     private AppUser user;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @Column(nullable = false)
-    private LocalDateTime expiresAt;
+    private Instant expiresAt;
 
     @Enumerated(EnumType.STRING)
     private PasswordResetStatus status;
@@ -41,7 +40,7 @@ public class PasswordResetToken {
         return PasswordResetToken.builder()
                 .token(UUID.randomUUID().toString())
                 .user(user)
-                .createdAt(LocalDateTime.now())
+                .createdAt(Instant.now())
                 .status(PasswordResetStatus.PENDING)
                 .build();
 

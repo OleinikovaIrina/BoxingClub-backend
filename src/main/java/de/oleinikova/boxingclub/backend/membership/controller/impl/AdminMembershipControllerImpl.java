@@ -25,7 +25,7 @@ import java.util.UUID;
 public class AdminMembershipControllerImpl implements AdminMembershipApi {
 
     private final MembershipService membershipService;
-    private  final MembershipMapper membershipMapper;
+    private final MembershipMapper membershipMapper;
 
     @Override
     public List<MembershipResponseDto> getMembershipByLastName(String lastName) {
@@ -45,6 +45,11 @@ public class AdminMembershipControllerImpl implements AdminMembershipApi {
     @Override
     public List<MembershipResponseDto> getActiveMemberships() {
         return membershipService.getActiveMemberships();
+    }
+
+    @Override
+    public List<MembershipResponseDto> getPendingMemberships() {
+        return membershipService.getPendingMemberships();
     }
 }
 

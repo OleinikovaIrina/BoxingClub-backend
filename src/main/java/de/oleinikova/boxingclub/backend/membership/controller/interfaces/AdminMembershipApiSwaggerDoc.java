@@ -19,7 +19,10 @@ public interface AdminMembershipApiSwaggerDoc {
     @Operation(summary = "Approve a membership")
     MembershipResponseDto approveMembership(UUID membershipId);
 
-    @Operation(summary = "Find   currently active memberships")
+    @Operation(summary = "Find  currently active memberships")
     List<MembershipResponseDto> getActiveMemberships();
+
+    @Operation(summary = "Find  pending memberships")
+    List<MembershipResponseDto> getPendingMemberships();
 
 }

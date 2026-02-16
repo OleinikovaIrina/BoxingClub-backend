@@ -25,4 +25,7 @@ public interface AdminMembershipApi extends AdminMembershipApiSwaggerDoc {
     @GetMapping("/active")
     List<MembershipResponseDto> getActiveMemberships();
 
+    @Override
+    @GetMapping("/pending")
+    List<MembershipResponseDto> getPendingMemberships();
 }

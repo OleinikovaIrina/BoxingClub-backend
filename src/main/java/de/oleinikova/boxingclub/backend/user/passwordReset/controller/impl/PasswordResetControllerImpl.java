@@ -1,6 +1,7 @@
 package de.oleinikova.boxingclub.backend.user.passwordReset.controller.impl;
 
 import de.oleinikova.boxingclub.backend.user.passwordReset.controller.interfaces.PasswordResetApi;
+import de.oleinikova.boxingclub.backend.user.passwordReset.dto.request.PasswordResetRequest;
 import de.oleinikova.boxingclub.backend.user.passwordReset.service.interfaces.PasswordResetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +27,8 @@ public class PasswordResetControllerImpl implements PasswordResetApi {
     }
 
     @Override
-    public ResponseEntity<Void> resetPassword(String tokenValue, String newPassword) {
-        passwordResetService.resetPassword(tokenValue,newPassword);
+    public ResponseEntity<Void> resetPassword(  PasswordResetRequest request) {
+        passwordResetService.resetPassword(request.passwordResetToken(),request.password());
         return ResponseEntity.ok().build();
     }
 }
