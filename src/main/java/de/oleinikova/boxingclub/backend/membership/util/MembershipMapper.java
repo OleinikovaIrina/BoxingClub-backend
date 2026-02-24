@@ -14,6 +14,7 @@ public interface MembershipMapper {
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "firstName", source = "user.firstName")
     @Mapping(target = "lastName", source = "user.lastName")
+    @Mapping(target = "active", expression = "java(membership.isCurrentlyActive())")
     MembershipResponseDto toDto(Membership membership);
 
     @Mapping(target = "id", ignore = true)
@@ -21,6 +22,5 @@ public interface MembershipMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "startDate", ignore = true)
     @Mapping(target = "endDate", ignore = true)
-    @Mapping(target = "active" , ignore = true)
     Membership toEntity(MembershipCreateRequestDto dto);
 }

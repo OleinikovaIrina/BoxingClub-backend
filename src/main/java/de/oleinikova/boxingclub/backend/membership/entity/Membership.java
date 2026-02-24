@@ -50,13 +50,11 @@ public class Membership {
     @Column(nullable = false)
     private MembershipDuration duration;
 
-    @Column(nullable = true)
+    @Column
     private LocalDate startDate;
 
-    @Column(nullable = true)
+    @Column
     private LocalDate endDate;
-
-    private boolean active;
 
     @Column(nullable = false)
     private boolean hasDiscount;
@@ -67,7 +65,27 @@ public class Membership {
     @Column(nullable = false)
     private boolean consentToDataPolicy;
 
+    public boolean isCurrentlyActive() {
+        if (status != MembershipStatus.APPROVED) return false;
+        if (startDate == null || endDate == null) return false;
 
+        LocalDate today = LocalDate.now();
+        return !today.isBefore(startDate) && !today.isAfter(endDate);
+    }
+
+    public void activate(LocalDate startDate, LocalDate endDate) {
+        this.status = MembershipStatus.APPROVED;
+        this.startDate = startDate;
+        this.endDate = endDate;
+
+    }
+
+    public void cancel(LocalDate today) {
+        this.status = MembershipStatus.CANCELLED;
+        if (endDate == null || endDate.isAfter(today)) {
+            endDate = today;
+        }
+    }
 }
 
 

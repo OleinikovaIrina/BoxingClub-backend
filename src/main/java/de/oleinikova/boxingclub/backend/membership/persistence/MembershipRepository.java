@@ -23,6 +23,7 @@ public interface MembershipRepository extends JpaRepository<Membership, UUID> {
     SELECT m
     FROM Membership m
     WHERE m.status = de.oleinikova.boxingclub.backend.membership.entity.MembershipStatus.APPROVED
+      AND m.startDate IS NOT NULL
       AND m.startDate <= CURRENT_DATE
       AND (m.endDate IS NULL OR m.endDate >= CURRENT_DATE)
 """)

@@ -37,15 +37,6 @@ public class MembershipServiceImpl implements MembershipService {
         AppUser user = appUserRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate;
-        switch (dto.duration()) {
-            case TRIAL -> endDate = startDate.plusDays(7);
-            case MONTHLY -> endDate = startDate.plusMonths(1);
-            case YEARLY -> endDate = startDate.plusYears(1);
-            default -> throw new MembershipDurationException(dto.duration().name());
-        }
-
         Membership entity = membershipMapper.toEntity(dto);
 
         if (dto.iban() != null && !dto.iban().isBlank()) {
@@ -54,10 +45,8 @@ public class MembershipServiceImpl implements MembershipService {
 
         entity.setUser(user);
         entity.setStatus(MembershipStatus.PENDING);
-        entity.setStartDate(startDate);
-        entity.setEndDate(endDate);
-        entity.setActive(false);
-
+        entity.setStartDate(null);
+        entity.setEndDate(null);
 
         Membership saved = repository.save(entity);
         return membershipMapper.toDto(saved);
@@ -79,10 +68,12 @@ public class MembershipServiceImpl implements MembershipService {
             }
         }
 
-        m.setStatus(MembershipStatus.APPROVED);
-        m.setActive(true);
+        LocalDate today = LocalDate.now();
+        LocalDate end = calculateEndDate(today, m.getDuration());
 
+        m.activate(today, end);
         m = repository.save(m);
+
         return membershipMapper.toDto(m);
     }
 
@@ -92,7 +83,6 @@ public class MembershipServiceImpl implements MembershipService {
                 .orElseThrow(MembershipNotFoundException::new);
 
         m.setStatus(MembershipStatus.REJECTED);
-        m.setActive(false);
 
         m = repository.save(m);
         return membershipMapper.toDto(m);
@@ -125,29 +115,10 @@ public class MembershipServiceImpl implements MembershipService {
                 .orElseThrow(MembershipNotFoundException::new);
 
         LocalDate today = LocalDate.now();
-
-        if (m.getStatus() == MembershipStatus.CANCELLED) {
-            boolean changed = false;
-            if (m.isActive()) {
-                m.setActive(false);
-                changed = true;
-            }
-            if (m.getEndDate() == null || m.getEndDate().isAfter(today)) {
-                m.setEndDate(today);
-                changed = true;
-            }
-            if (changed) m = repository.save(m);
-            return membershipMapper.toDto(m);
-        }
-
-        m.setStatus(MembershipStatus.CANCELLED);
-        m.setActive(false);
-        if (m.getEndDate() == null || m.getEndDate().isAfter(today)) {
-            m.setEndDate(today);
-        }
-
+        m.cancel(today);
         m = repository.save(m);
         return membershipMapper.toDto(m);
+
     }
 
     @Override
@@ -186,5 +157,14 @@ public class MembershipServiceImpl implements MembershipService {
                 .stream()
                 .map(membershipMapper::toDto)
                 .toList();
+    }
+
+    private LocalDate calculateEndDate(LocalDate start, MembershipDuration duration) {
+        return switch (duration) {
+            case TRIAL -> start.plusDays(7);
+            case MONTHLY -> start.plusMonths(1);
+            case YEARLY -> start.plusYears(1);
+            default -> throw new MembershipDurationException(duration.name());
+        };
     }
 }

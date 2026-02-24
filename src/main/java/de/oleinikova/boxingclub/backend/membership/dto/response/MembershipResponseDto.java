@@ -5,6 +5,7 @@ import de.oleinikova.boxingclub.backend.membership.entity.MembershipStatus;
 import de.oleinikova.boxingclub.backend.membership.entity.MembershipType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 public record MembershipResponseDto
@@ -45,7 +46,29 @@ public record MembershipResponseDto
                         description = "Application status",
                         example = "PENDING"
                 )
-                MembershipStatus status
+                MembershipStatus status,
+
+                @Schema(
+                        description = "Date when the membership becomes active. " +
+                                "Set when the administrator confirms activation. " +
+                                "Null if the membership is not yet activated.",
+                        example = "2026-01-01"
+                )
+                LocalDate startDate,
+
+                @Schema(
+                        description = "Date when the membership expires based on the selected duration. " +
+                                "Null if the membership is not yet activated.",
+                        example = "2026-02-01"
+                )
+                LocalDate endDate,
+
+                @Schema(
+                        description = "Indicates whether the membership is currently active. " +
+                                "True only if status is ACTIVE and current date is within the subscription period.",
+                        example = "true"
+                )
+                boolean active
         ) {
 }
 
