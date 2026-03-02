@@ -1,0 +1,9 @@
+image: gradle:8.5-jdk17
+
+stages:
+    - build
+
+build-job:
+    stage: build
+    script:
+        - ./gradlew clean build -x test   
