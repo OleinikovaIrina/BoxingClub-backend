@@ -65,7 +65,7 @@ public class SecurityConfig {
         if (jwtEnabled) {
             // строгий режим
             http.authorizeHttpRequests(auth -> auth
-                    .requestMatchers(PathRequest.toH2Console()).permitAll()
+                    //.requestMatchers(PathRequest.toH2Console()).permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers(
                             "/swagger-ui/**",
@@ -81,7 +81,7 @@ public class SecurityConfig {
         } else {
             // открытый dev-режим
             http.authorizeHttpRequests(auth -> auth
-                    .requestMatchers(PathRequest.toH2Console()).permitAll()
+                   // .requestMatchers(PathRequest.toH2Console()).permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/actuator/health").permitAll()
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
