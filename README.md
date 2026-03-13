@@ -93,6 +93,32 @@ Example:
 - Mailtrap (development email testing)
 - Gradle
 
+## AI Training Advice Integration
+
+The backend includes an experimental AI integration that provides boxing training advice.
+
+Users can send a question about boxing training and the backend forwards the request to an external AI model using the Groq API.
+
+The service sends the request using Spring `WebClient`, processes the JSON response and returns the generated advice. AI API key must be provided via environment variable GROQ_API_KEY
+
+### Endpoint
+
+POST /api/ai/training-advice
+
+Example request:
+
+`
+{
+  "question": "How can I improve boxing stamina?"
+}
+`
+Example response:
+`
+{
+"answer": "Focus on interval training, jump rope sessions and sparring rounds."
+}
+`
+
 ## Environment Configuration
 
 Sensitive values are externalized via environment variables.

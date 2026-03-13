@@ -8,6 +8,7 @@ import de.oleinikova.boxingclub.backend.user.passwordReset.entity.PasswordResetS
 import de.oleinikova.boxingclub.backend.user.passwordReset.entity.PasswordResetToken;
 import de.oleinikova.boxingclub.backend.user.passwordReset.persistence.PasswordResetRepository;
 import de.oleinikova.boxingclub.backend.user.persistence.AppUserRepository;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,26 +35,34 @@ class PasswordResetServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @Mock private EmailService emailService;
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private PasswordResetServiceImpl passwordResetService;
 
     @Test
-    void shouldCreatePasswordResetTokenSuccessfully() {
-        String email = "test@mail.com";
+    void shouldCreatePasswordResetTokenSuccessfully() throws MessagingException {
+
+        String email = "test@mail";
         AppUser user = new AppUser();
         user.setEmail(email);
-
-        when(userRepository.findByEmailIgnoreCase(email))
-                .thenReturn(Optional.of(user));
+        when(userRepository.findByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
 
         passwordResetService.createPasswordResetToken(email);
 
         verify(userRepository).findByEmailIgnoreCase(email);
         verify(tokenRepository).deleteByUser(user);
         verify(tokenRepository).save(any(PasswordResetToken.class));
+
+        verify(emailService).sendHtmlMail(
+                eq(email),
+                anyString(),
+                contains("reset-password")
+        );
+
     }
+
 
     @Test
     void shouldValidatePasswordResetTokenSuccessfully() {

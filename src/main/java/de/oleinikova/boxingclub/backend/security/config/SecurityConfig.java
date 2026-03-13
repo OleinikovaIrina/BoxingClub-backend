@@ -72,7 +72,8 @@ public class SecurityConfig {
                             "/v3/api-docs/**",
                             "/actuator/health",
                             "/api/auth/**",
-                            "/api/password/**"
+                            "/api/password/**",
+                            "/api/ai/**"
                     ).permitAll()
                     .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
@@ -81,10 +82,10 @@ public class SecurityConfig {
         } else {
             // открытый dev-режим
             http.authorizeHttpRequests(auth -> auth
-                   // .requestMatchers(PathRequest.toH2Console()).permitAll()
+                    // .requestMatchers(PathRequest.toH2Console()).permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/actuator/health").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**","/api/ai/**").permitAll()
                     .requestMatchers("/api/test-mail/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
