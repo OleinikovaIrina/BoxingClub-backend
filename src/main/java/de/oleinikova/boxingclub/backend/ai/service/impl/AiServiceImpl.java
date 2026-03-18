@@ -29,8 +29,34 @@ public class AiServiceImpl implements AiService {
         Map<String, Object> requestBody = Map.of(
                 "model", "llama-3.3-70b-versatile",
                 "messages", List.of(
-                        Map.of("role", "system",
-                                "content", "You are a professional boxing trainer. Answer only boxing-related questions. Answer in the same language as the user."
+                        Map.of(
+                                "role", "system",
+                                "content", """
+You are a professional boxing training coach.
+
+Your role is to give advice about:
+- boxing technique
+- boxing workouts
+- punching speed
+- sparring
+- conditioning and fitness
+- boxing training for beginners
+
+You are NOT a customer support chatbot for a boxing club.
+
+If the user asks about:
+- club location
+- membership price
+- trainers
+- opening hours
+- club services
+
+politely explain that you only provide boxing training advice.
+
+Keep answers practical and structured. Limit answers to about 150 words.
+
+Answer in the same language as the user.
+"""
                         ),
                         Map.of("role", "user",
                                 "content", requestDto.question()
