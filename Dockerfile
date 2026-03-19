@@ -28,11 +28,9 @@ WORKDIR /app
 COPY --from=builder /workspace/app/build/libs/*.jar /app/app.jar
 
 
+EXPOSE 8080
 
-
-EXPOSE 8081
-
-# активируем профиль dev —  на prod при необходимости !!!
-ENV SPRING_PROFILES_ACTIVE=dev
+# production profile
+ENV SPRING_PROFILES_ACTIVE=prod
 
 ENTRYPOINT ["java","-jar","/app/app.jar"]
