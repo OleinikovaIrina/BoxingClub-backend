@@ -121,15 +121,17 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
 
-        // Vite dev server (5173)
-        cfg.setAllowedOrigins(List.of("http://localhost:5173"));
-
+        // Vite
+        cfg.setAllowedOriginPatterns(List.of(
+                "http://localhost:5173",
+                "https://*.onrender.com"
+        ));
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         cfg.setExposedHeaders(List.of("Authorization"));
 
 
-        cfg.setAllowCredentials(false);
+        cfg.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cfg);
