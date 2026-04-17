@@ -1,5 +1,6 @@
 package de.oleinikova.boxingclub.backend.membership.service.impl;
 
+import de.oleinikova.boxingclub.backend.exception.RestApiException;
 import de.oleinikova.boxingclub.backend.membership.entity.Membership;
 import de.oleinikova.boxingclub.backend.membership.entity.MembershipDuration;
 import de.oleinikova.boxingclub.backend.membership.entity.MembershipStatus;
@@ -14,6 +15,7 @@ import de.oleinikova.boxingclub.backend.membership.util.MembershipMapper;
 import de.oleinikova.boxingclub.backend.user.entity.AppUser;
 import de.oleinikova.boxingclub.backend.user.persistence.AppUserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
@@ -58,13 +60,13 @@ public class MembershipServiceImpl implements MembershipService {
                 .orElseThrow(MembershipNotFoundException::new);
 
         if (m.getDuration() == MembershipDuration.TRIAL) {
-            boolean everHadApprovedTrial = repository.existsByUser_IdAndDurationAndStatus(
+            boolean everHadApprovedTrial = repository.existsByUser_IdAndDurationAndStatusIn(
                     m.getUser().getId(),
                     MembershipDuration.TRIAL,
-                    MembershipStatus.APPROVED
+                    List.of(MembershipStatus.APPROVED, MembershipStatus.CANCELLED)
             );
             if (everHadApprovedTrial) {
-                throw new IllegalStateException("User already used a TRIAL once.");
+                throw new RestApiException(HttpStatus.CONFLICT, "User already used a TRIAL once.");
             }
         }
 

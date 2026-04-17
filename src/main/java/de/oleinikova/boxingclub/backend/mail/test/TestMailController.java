@@ -3,13 +3,17 @@ package de.oleinikova.boxingclub.backend.mail.test;
 import de.oleinikova.boxingclub.backend.mail.EmailService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Profile("dev")
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("api/test-mail")
 @RequiredArgsConstructor
 public class TestMailController {

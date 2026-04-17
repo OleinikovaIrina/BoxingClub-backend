@@ -20,14 +20,16 @@ public record MembershipResponseDto
                         description = "ID of the user who owns the membership",
                         example = "1c9e1f92-4c0f-4b8a-9a4e-9c5a9b9f0a12"
                 )
-                UUID userId,                @Schema
+                UUID userId,
+
+                @Schema
                         (description = "User first name",
                                 example = "Iryna")
                 String firstName,
 
                 @Schema
                         (description = "User last name",
-                        example = "Oleinikova")
+                                example = "Oleinikova")
                 String lastName,
 
                 @Schema(

@@ -25,7 +25,6 @@ import java.util.UUID;
 public class AdminMembershipControllerImpl implements AdminMembershipApi {
 
     private final MembershipService membershipService;
-    private final MembershipMapper membershipMapper;
 
     @Override
     public List<MembershipResponseDto> getMembershipByLastName(String lastName) {

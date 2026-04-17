@@ -14,6 +14,21 @@ The system simulates real-world boxing club administration:
 - Password reset via email token
 - Administrative membership management
 
+## 🚀 Live API (Production)
+
+Backend is deployed at:
+
+👉 https://boxingclub-backend.onrender.com
+
+### Health check
+ /actuator/health
+
+### Example secured endpoint
+ /api/memberships (requires JWT token)
+
+Note:
+The service may take a few seconds to start if inactive (free tier cold start).
+
 ## Architecture
 
 The project follows a layered architecture:

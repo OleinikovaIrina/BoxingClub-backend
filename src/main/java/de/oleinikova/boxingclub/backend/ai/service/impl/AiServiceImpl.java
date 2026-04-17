@@ -32,31 +32,31 @@ public class AiServiceImpl implements AiService {
                         Map.of(
                                 "role", "system",
                                 "content", """
-You are a professional boxing training coach.
-
-Your role is to give advice about:
-- boxing technique
-- boxing workouts
-- punching speed
-- sparring
-- conditioning and fitness
-- boxing training for beginners
-
-You are NOT a customer support chatbot for a boxing club.
-
-If the user asks about:
-- club location
-- membership price
-- trainers
-- opening hours
-- club services
-
-politely explain that you only provide boxing training advice.
-
-Keep answers practical and structured. Limit answers to about 150 words.
-
-Answer in the same language as the user.
-"""
+                                        You are a professional boxing training coach.
+                                        
+                                        Your role is to give advice about:
+                                        - boxing technique
+                                        - boxing workouts
+                                        - punching speed
+                                        - sparring
+                                        - conditioning and fitness
+                                        - boxing training for beginners
+                                        
+                                        You are NOT a customer support chatbot for a boxing club.
+                                        
+                                        If the user asks about:
+                                        - club location
+                                        - membership price
+                                        - trainers
+                                        - opening hours
+                                        - club services
+                                        
+                                        politely explain that you only provide boxing training advice.
+                                        
+                                        Keep answers practical and structured. Limit answers to about 150 words.
+                                        
+                                        Answer in the same language as the user.
+                                        """
                         ),
                         Map.of("role", "user",
                                 "content", requestDto.question()
@@ -79,12 +79,31 @@ Answer in the same language as the user.
             return new AiResponseDto("AI service returned empty response");
         }
 
-        List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
+        Object rawChoices = response.get("choices");
 
-        Map<String, Object> firstChoice = choices.get(0);
-        Map<String, Object> message = (Map<String, Object>) firstChoice.get("message");
-        String answer = (String) message.get("content");
+        if (!(rawChoices instanceof List<?> choicesList) || choicesList.isEmpty()) {
+            return new AiResponseDto("AI service returned empty or invalid response");
+        }
+
+        Object first = choicesList.get(0);
+
+        if (!(first instanceof Map<?, ?> firstChoice)) {
+            return new AiResponseDto("Invalid AI response format");
+        }
+
+        Object rawMessage = firstChoice.get("message");
+
+        if (!(rawMessage instanceof Map<?, ?> message)) {
+            return new AiResponseDto("Invalid AI response format");
+        }
+
+        Object rawContent = message.get("content");
+
+        if (!(rawContent instanceof String answer)) {
+            return new AiResponseDto("Invalid AI response format");
+        }
 
         return new AiResponseDto(answer);
+
     }
 }
