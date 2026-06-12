@@ -2,8 +2,10 @@ package de.oleinikova.boxingclub.backend.user.controller.impl;
 
 import de.oleinikova.boxingclub.backend.user.controller.interfaces.UserApi;
 import de.oleinikova.boxingclub.backend.user.dto.request.UserCreateDto;
+import de.oleinikova.boxingclub.backend.user.dto.response.TrainerResponseDto;
 import de.oleinikova.boxingclub.backend.user.dto.response.UserCreateResponseDto;
 import de.oleinikova.boxingclub.backend.user.dto.response.UserResponseDto;
+import de.oleinikova.boxingclub.backend.user.entity.Role;
 import de.oleinikova.boxingclub.backend.user.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +33,11 @@ public class UserApiControllerImpl implements UserApi {
     @Override
     public UserResponseDto getUserByEmail(String email) {
         return userService.getUserByEmail(email);
+    }
+
+    @Override
+    public List<TrainerResponseDto> getAllTrainers() {
+        return userService.getUserByRole(Role.ROLE_TRAINER);
     }
 
     @Override

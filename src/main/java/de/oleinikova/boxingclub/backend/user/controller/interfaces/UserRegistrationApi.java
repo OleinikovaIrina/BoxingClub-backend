@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/auth")
-public interface UserRegistrationApi  extends UserRegistrationApiSwaggerDoc{
+public interface UserRegistrationApi extends UserRegistrationApiSwaggerDoc {
     @Override
     @PermitAll
     @PostMapping("/register")

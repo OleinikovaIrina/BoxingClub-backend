@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-public class UserMembershipControllerImpl  implements UserMembershipApi, UserMembershipApiSwaggerDoc {
+public class UserMembershipControllerImpl implements UserMembershipApi {
 
     private final MembershipService membershipService;
 
@@ -39,8 +39,8 @@ public class UserMembershipControllerImpl  implements UserMembershipApi, UserMem
     }
 
     @Override
-    public MembershipResponseDto cancelMembership(UUID membershipId,Authentication authentication  ) {
+    public MembershipResponseDto cancelMembership(UUID membershipId, Authentication authentication) {
         String email = authentication.getName();
-        return membershipService.cancelMembershipByEmail(membershipId,email);
+        return membershipService.cancelMembershipByEmail(membershipId, email);
     }
 }

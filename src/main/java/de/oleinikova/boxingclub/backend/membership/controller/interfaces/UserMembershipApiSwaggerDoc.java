@@ -2,7 +2,6 @@ package de.oleinikova.boxingclub.backend.membership.controller.interfaces;
 
 import de.oleinikova.boxingclub.backend.membership.dto.request.MembershipCreateRequestDto;
 import de.oleinikova.boxingclub.backend.membership.dto.response.MembershipResponseDto;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;

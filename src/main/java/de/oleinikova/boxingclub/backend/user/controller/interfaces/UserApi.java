@@ -1,8 +1,10 @@
 package de.oleinikova.boxingclub.backend.user.controller.interfaces;
 
 import de.oleinikova.boxingclub.backend.user.dto.request.UserCreateDto;
+import de.oleinikova.boxingclub.backend.user.dto.response.TrainerResponseDto;
 import de.oleinikova.boxingclub.backend.user.dto.response.UserCreateResponseDto;
 import de.oleinikova.boxingclub.backend.user.dto.response.UserResponseDto;
+import de.oleinikova.boxingclub.backend.user.entity.Role;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RequestMapping("/api/admin/users")
-public interface UserApi extends UserApiSwaggerDoc{
+public interface UserApi extends UserApiSwaggerDoc {
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
@@ -24,6 +26,11 @@ public interface UserApi extends UserApiSwaggerDoc{
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{userId}")
     UserResponseDto getUserById(@PathVariable UUID userId);
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/trainers")
+    List<TrainerResponseDto> getAllTrainers ();
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")

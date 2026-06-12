@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RequestMapping("/api/user/memberships")
-public interface UserMembershipApi {
+public interface UserMembershipApi extends UserMembershipApiSwaggerDoc {
 
 
     @PostMapping

@@ -1,5 +1,6 @@
 package de.oleinikova.boxingclub.backend.user.service.impl;
 
+import de.oleinikova.boxingclub.backend.user.dto.response.TrainerResponseDto;
 import de.oleinikova.boxingclub.backend.user.exception.UserNotFoundException;
 import de.oleinikova.boxingclub.backend.user.dto.request.UserCreateDto;
 import de.oleinikova.boxingclub.backend.user.dto.response.UserCreateResponseDto;
@@ -10,6 +11,7 @@ import de.oleinikova.boxingclub.backend.user.entity.Role;
 import de.oleinikova.boxingclub.backend.user.persistence.AppUserRepository;
 import de.oleinikova.boxingclub.backend.user.service.interfaces.UserService;
 import de.oleinikova.boxingclub.backend.user.util.AppUserMapper;
+import de.oleinikova.boxingclub.backend.user.util.TrainerMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final AppUserRepository repo;
     private final AppUserMapper mapper;
     private final PasswordEncoder passwordEncoder;
+    private final TrainerMapper trainerMapper;
 
     private String normalizeEmail(String raw) {
         return raw == null ? null : raw.trim().toLowerCase(Locale.ROOT);
@@ -59,6 +62,14 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto getUserById(UUID userId) {
         AppUser user = repo.findById(userId).orElseThrow(UserNotFoundException::new);
         return mapper.toResponseDto(user);
+    }
+
+    @Override
+    public List<TrainerResponseDto> getUserByRole(Role role) {
+        return repo.findAllByRole(role)
+                .stream()
+                .map(trainerMapper::toTrainerResponseDto)
+                .toList();
     }
 
     @Override

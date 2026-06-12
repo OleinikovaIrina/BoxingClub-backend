@@ -158,6 +158,38 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getHttpStatus()).body(body);
     }
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ErrorResponseDto> handleAccessDenied(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto body = error(
+                HttpStatus.FORBIDDEN,
+                "Access denied",
+                List.of(),
+                request
+        );
+
+        log.warn("403 Access denied: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDto> handleIllegalArgument(
+            IllegalArgumentException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto body = error(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                List.of(),
+                request
+        );
+
+        log.warn("400 Illegal argument: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
     // --- 500 fallback ---
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleUncaught(Exception ex, HttpServletRequest request) {
