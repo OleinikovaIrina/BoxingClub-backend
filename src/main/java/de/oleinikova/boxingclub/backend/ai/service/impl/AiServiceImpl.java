@@ -5,6 +5,7 @@ import de.oleinikova.boxingclub.backend.ai.dto.response.AiResponseDto;
 import de.oleinikova.boxingclub.backend.ai.service.interfaces.AiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -21,13 +22,16 @@ public class AiServiceImpl implements AiService {
     @Value("${ai.groq.url}")
     private String groqUrl;
 
+    @Value("${ai.groq.model}")
+    private String groqModel;
+
     private final WebClient webClient;
 
     @Override
     public AiResponseDto askQuestion(AiRequestDto requestDto) {
 
         Map<String, Object> requestBody = Map.of(
-                "model", "llama-3.3-70b-versatile",
+                "model", groqModel,
                 "messages", List.of(
                         Map.of(
                                 "role", "system",
@@ -71,7 +75,10 @@ public class AiServiceImpl implements AiService {
                         .header("Authorization", "Bearer " + groqApiKey)
                         .bodyValue(requestBody)
                         .retrieve()
-                        .bodyToMono(Map.class)
+                        .bodyToMono(
+                                new ParameterizedTypeReference<Map<String, Object>>() {
+                                }
+                        )
                         .block();
 
 

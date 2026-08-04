@@ -12,10 +12,12 @@ import de.oleinikova.boxingclub.backend.user.persistence.AppUserRepository;
 import de.oleinikova.boxingclub.backend.user.service.interfaces.UserRegisterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import de.oleinikova.boxingclub.backend.exception.RestApiException;
+import org.springframework.http.HttpStatus;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -34,6 +36,12 @@ public class UserRegisterServiceImpl implements UserRegisterService {
         return raw == null ? null : raw.trim().toLowerCase(Locale.ROOT);
     }
 
+    @Value("${app.backend-url}")
+    private String backendUrl;
+
+    @Value("${security.email-confirmation.expiration-minutes:90}")
+    private int confirmationTtlMinutes;
+
     @Transactional
     @Override
     public UserCreateResponseDto register(UserCreateDto userCreateDto) {
@@ -45,7 +53,7 @@ public class UserRegisterServiceImpl implements UserRegisterService {
             final AppUser ex = existing.get();
             if (ex.getConfirmationStatus() == ConfirmationStatus.UNCONFIRMED) {
                 String token = confirmationService.regenerateCode(ex);
-                sendConfirmationEmail(ex,token);
+                sendConfirmationEmail(ex, token);
 
                 return new UserCreateResponseDto(
                         ex.getId(),
@@ -55,6 +63,10 @@ public class UserRegisterServiceImpl implements UserRegisterService {
                 );
             }
 
+            throw new RestApiException(
+                    HttpStatus.CONFLICT,
+                    "Email already used"
+            );
         }
         final AppUser appUser = new AppUser();
         appUser.setFirstName(userCreateDto.firstName().trim());
@@ -84,6 +96,9 @@ public class UserRegisterServiceImpl implements UserRegisterService {
         AppUser appUser = confirmationService.confirmAndConsume(code);
         appUser.setConfirmationStatus(ConfirmationStatus.CONFIRMED);
         AppUser updated = userRepo.save(appUser);
+
+        log.info("Email registration confirmed successfully");
+
         return new UserResponseDto(
                 updated.getEmail(),
                 updated.getRole(),
@@ -92,26 +107,35 @@ public class UserRegisterServiceImpl implements UserRegisterService {
     }
 
     private void sendConfirmationEmail(AppUser user, String token) {
-        String link = "http://localhost:8081/api/auth/confirm?code=" + token;
+
+        String link = backendUrl + "/api/auth/confirm?code=" + token;
 
 
         String html = "<p>Hello " + user.getFirstName() + ",</p>"
                 + "<p>Thank you for registering in <b>BoxingClub</b>!</p>"
                 + "<p>Please confirm your email by clicking the link below:</p>"
                 + "<p><a href=\"" + link + "\">CONFIRM ACCOUNT</a></p>"
-                + "<p>The link is valid for 24 hours.</p>";
+                + "<p>The link is valid for "
+                + confirmationTtlMinutes
+                + " minutes.</p>";
 
         try {
             emailService.sendHtmlMail(
                     user.getEmail(),
                     "Boxing Club - Confirm your account",
-
                     html
             );
-            log.info("Confirmation email sent to {}", user.getEmail());
+
+            log.info("Confirmation email sent successfully");
+
         } catch (Exception e) {
+
             log.error("Failed to send confirmation email", e);
+
+            throw new RestApiException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Confirmation email could not be sent"
+            );
         }
     }
 }
-

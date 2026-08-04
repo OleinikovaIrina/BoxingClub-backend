@@ -17,6 +17,7 @@ public interface AppUserMapper {
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "confirmationStatus", ignore = true)
     @Mapping(target = "enabled", ignore = true)
+    @Mapping(target = "telegramChatId", ignore = true)
     AppUser toEntity(UserCreateDto dto);
 
     @Mapping(target = "confirmationResent", constant = "false")

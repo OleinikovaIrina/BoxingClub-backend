@@ -11,6 +11,7 @@ import de.oleinikova.boxingclub.backend.membership.exception.MembershipNotFoundE
 import de.oleinikova.boxingclub.backend.membership.persistence.MembershipRepository;
 import de.oleinikova.boxingclub.backend.membership.util.MembershipMapper;
 import de.oleinikova.boxingclub.backend.user.entity.AppUser;
+import de.oleinikova.boxingclub.backend.user.entity.ConfirmationStatus;
 import de.oleinikova.boxingclub.backend.user.exception.UserNotFoundException;
 import de.oleinikova.boxingclub.backend.user.persistence.AppUserRepository;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,7 @@ class MembershipServiceImplTest {
         UUID userId = UUID.randomUUID();
         AppUser existing = new AppUser();
         existing.setId(userId);
+        existing.setConfirmationStatus(ConfirmationStatus.CONFIRMED);
 
         MembershipCreateRequestDto membershipCreateRequestDto = new MembershipCreateRequestDto(MembershipType.ADULT, MembershipDuration.MONTHLY, "Musterstraße 22", "80331", "Aschaffenburg", "  de89370400440532013000", false, true, true);
         Membership membership = new Membership();

@@ -27,6 +27,7 @@ public record UserCreateDto(
                 example = "test_box@box.de"
         )
         String email,
+
         @NotBlank(message = "{user.password.notBlank}")
         @Pattern(
                 regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}$",
@@ -34,7 +35,7 @@ public record UserCreateDto(
         )
         @Schema(
                 description = "new User password",
-                example = " "
+                example = " Testuser123!"
         )
         String password
         )

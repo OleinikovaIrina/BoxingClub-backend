@@ -85,7 +85,7 @@ public class SecurityConfig {
                     // .requestMatchers(PathRequest.toH2Console()).permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/actuator/health").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**","/api/ai/**").permitAll()
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api/ai/**").permitAll()
                     .requestMatchers("/api/test-mail/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
@@ -101,10 +101,12 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        var p = new DaoAuthenticationProvider();
-        p.setUserDetailsService(userDetailsService);
-        p.setPasswordEncoder(passwordEncoder());
-        return p;
+        DaoAuthenticationProvider provider =
+                new DaoAuthenticationProvider(userDetailsService);
+
+        provider.setPasswordEncoder(passwordEncoder());
+
+        return provider;
     }
 
     @Bean

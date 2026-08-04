@@ -1,8 +1,10 @@
 package de.oleinikova.boxingclub.backend.user.service.impl;
 
+import de.oleinikova.boxingclub.backend.mail.EmailService;
 import de.oleinikova.boxingclub.backend.user.confirmation.interfaces.ConfirmationService;
 import de.oleinikova.boxingclub.backend.user.dto.request.UserCreateDto;
 import de.oleinikova.boxingclub.backend.user.dto.response.UserCreateResponseDto;
+import de.oleinikova.boxingclub.backend.user.dto.response.UserResponseDto;
 import de.oleinikova.boxingclub.backend.user.entity.AppUser;
 import de.oleinikova.boxingclub.backend.user.entity.ConfirmationStatus;
 import de.oleinikova.boxingclub.backend.user.entity.Role;
@@ -30,6 +32,8 @@ class UserRegisterServiceImplTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private ConfirmationService confirmationService;
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private UserRegisterServiceImpl userRegisterService;
@@ -88,6 +92,24 @@ class UserRegisterServiceImplTest {
     @Test
     void confirmRegistration() {
 
+        AppUser user = new AppUser();
+        user.setEmail("user@example.com");
+        user.setRole(Role.ROLE_USER);
+        user.setConfirmationStatus(ConfirmationStatus.UNCONFIRMED);
+
+        when(confirmationService.confirmAndConsume("confirmation-code")).thenReturn(user);
+        when(userRepo.save(user)).thenReturn(user);
+
+        UserResponseDto responseDto = userRegisterService.confirmRegistration("confirmation-code");
+
+        assertEquals(ConfirmationStatus.CONFIRMED, user.getConfirmationStatus());
+        assertEquals("user@example.com", responseDto.email());
+        assertEquals(Role.ROLE_USER, responseDto.role());
+        assertEquals(ConfirmationStatus.CONFIRMED,responseDto.confirmationStatus());
+
+        verify(confirmationService).confirmAndConsume("confirmation-code");
+
+        verify(userRepo).save(user);
 
     }
 }

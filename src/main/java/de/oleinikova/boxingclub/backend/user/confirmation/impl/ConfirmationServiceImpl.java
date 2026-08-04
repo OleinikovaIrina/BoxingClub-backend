@@ -8,9 +8,7 @@ import de.oleinikova.boxingclub.backend.user.entity.AppUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -23,8 +21,9 @@ public class ConfirmationServiceImpl implements ConfirmationService {
 
     private final ConfirmationCodeRepository repo;
 
-    @Value("${passwordReset.expiration.minutes:90}")
+    @Value("${security.email-confirmation.expiration-minutes:90}")
     private int ttlMinutes;
+
     @Transactional
     @Override
     public String generateConfirmationCode(AppUser appUser) {
@@ -44,23 +43,29 @@ public class ConfirmationServiceImpl implements ConfirmationService {
         return generateConfirmationCode(appUser);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     @Override
     public AppUser confirmAndConsume(String code) {
-        log.info("Confirm request received with code='{}' (class={})", code, code.getClass().getName());
-        log.info("Code: {}", code);
-        var token = repo.findByCode(code)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid  code"));
-        log.info("Token found: {}", token);
-        log.info("User: {}", token.getUser());
 
-        if (token.getStatus() != ConfirmationTokenStatus.PENDING)
+        log.info("Email confirmation request received");
+
+        var token = repo.findByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid confirmation code"));
+
+
+        if (token.getStatus() != ConfirmationTokenStatus.PENDING) {
             throw new IllegalStateException("Confirmation code already used");
-        if (token.getExpiresAt().isBefore(LocalDateTime.now()))
+        }
+
+        if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new IllegalStateException("Confirmation code expired");
+        }
 
         token.setStatus(ConfirmationTokenStatus.USED);
         repo.save(token);
+
+        log.debug("Confirmation code validated and marked as used");
+
         return token.getUser();
     }
 }

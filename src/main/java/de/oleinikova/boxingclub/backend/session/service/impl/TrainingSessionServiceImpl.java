@@ -50,8 +50,8 @@ public class TrainingSessionServiceImpl implements TrainingSessionService {
 
         AppUser trainer = userRepository.findById(dto.trainerId()).orElseThrow(UserNotFoundException::new);
 
-        if (trainer.getRole() != Role.ROLE_TRAINER) {
-            throw new RestApiException(HttpStatus.BAD_REQUEST, "User is not a trainer");
+        if (trainer.getRole() != Role.ROLE_TRAINER || !trainer.isEnabled()) {
+            throw new RestApiException(HttpStatus.BAD_REQUEST,  "Trainer is not available");
         }
 
         session.setTrainer(trainer);

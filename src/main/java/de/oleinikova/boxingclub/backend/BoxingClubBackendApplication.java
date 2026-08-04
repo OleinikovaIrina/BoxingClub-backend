@@ -7,12 +7,15 @@ import de.oleinikova.boxingclub.backend.user.persistence.AppUserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
 @EnableAsync
+@EnableScheduling
 public class BoxingClubBackendApplication {
 
     public static void main(String[] args) {
@@ -20,6 +23,10 @@ public class BoxingClubBackendApplication {
     }
 
     @Bean
+    @ConditionalOnProperty(
+            name = "app.demo-data.enabled",
+            havingValue = "true"
+    )
     CommandLineRunner initUsers(AppUserRepository userRepository, PasswordEncoder encoder) {
         return args -> {
 

@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<TrainerResponseDto> getUserByRole(Role role) {
-        return repo.findAllByRole(role)
+        return repo.findAllByRoleAndEnabledTrue(role)
                 .stream()
                 .map(trainerMapper::toTrainerResponseDto)
                 .toList();

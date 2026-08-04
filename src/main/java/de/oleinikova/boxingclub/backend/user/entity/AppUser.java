@@ -49,6 +49,9 @@ public class AppUser {
     @Column(nullable = false)
     private boolean enabled = true;
 
+    @Column(name = "telegram_chat_id", unique = true)
+    private Long telegramChatId;
+
     @Override
     public String toString() {
         return "AppUser{" +

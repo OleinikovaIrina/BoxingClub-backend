@@ -4,9 +4,11 @@ import de.oleinikova.boxingclub.backend.ai.dto.request.AiRequestDto;
 import de.oleinikova.boxingclub.backend.ai.dto.response.AiResponseDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -54,6 +56,7 @@ class AiServiceImplTest {
 
         ReflectionTestUtils.setField(aiService, "groqUrl", "https://api.groq.com/openai");
         ReflectionTestUtils.setField(aiService, "groqApiKey", "test-key");
+        ReflectionTestUtils.setField(aiService, "groqModel", "test-model");
 
         when(webClient.post()).thenReturn(requestBodyUriSpec);
 
@@ -69,8 +72,13 @@ class AiServiceImplTest {
         when(requestHeadersSpec.retrieve())
                 .thenReturn(responseSpec);
 
-        when(responseSpec.bodyToMono(Map.class))
-                .thenReturn(reactor.core.publisher.Mono.just(mockResponse));
+        when(responseSpec.bodyToMono(
+                ArgumentMatchers
+                        .<ParameterizedTypeReference<Map<String, Object>>>any()
+        ))
+                .thenReturn(
+                        reactor.core.publisher.Mono.just(mockResponse)
+                );
 
         AiResponseDto response = aiService.askQuestion(requestDto);
 

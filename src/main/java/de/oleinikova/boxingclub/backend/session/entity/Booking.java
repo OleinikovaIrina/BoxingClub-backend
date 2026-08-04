@@ -39,5 +39,8 @@ public class Booking {
     @Column(nullable = false)
     private boolean cancelled = false;
 
+    @Column(name="reminder_sent", nullable = false)
+    private boolean reminderSent = false;
+
 
 }

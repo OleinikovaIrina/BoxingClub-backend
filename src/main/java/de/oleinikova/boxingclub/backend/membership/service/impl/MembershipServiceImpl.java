@@ -6,6 +6,7 @@ import de.oleinikova.boxingclub.backend.membership.entity.MembershipDuration;
 import de.oleinikova.boxingclub.backend.membership.entity.MembershipStatus;
 import de.oleinikova.boxingclub.backend.membership.exception.MembershipDurationException;
 import de.oleinikova.boxingclub.backend.membership.exception.MembershipNotFoundException;
+import de.oleinikova.boxingclub.backend.user.entity.ConfirmationStatus;
 import de.oleinikova.boxingclub.backend.user.exception.UserNotFoundException;
 import de.oleinikova.boxingclub.backend.membership.service.interfaces.MembershipService;
 import de.oleinikova.boxingclub.backend.membership.dto.request.MembershipCreateRequestDto;
@@ -38,6 +39,11 @@ public class MembershipServiceImpl implements MembershipService {
     public MembershipResponseDto createMembership(UUID userId, MembershipCreateRequestDto dto) {
         AppUser user = appUserRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
+
+        if (user.getConfirmationStatus() != ConfirmationStatus.CONFIRMED) {
+            throw new RestApiException(HttpStatus.FORBIDDEN,
+                    "Please confirm your email before applying for membership.");
+        }
 
         Membership entity = membershipMapper.toEntity(dto);
 

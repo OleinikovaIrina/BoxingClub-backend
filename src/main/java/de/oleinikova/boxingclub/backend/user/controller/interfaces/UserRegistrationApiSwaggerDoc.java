@@ -6,6 +6,7 @@ import de.oleinikova.boxingclub.backend.user.dto.response.UserCreateResponseDto;
 import de.oleinikova.boxingclub.backend.user.dto.response.UserResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
 
 @Tag(name = "User Registration", description = "Operation Registration for regular user")
 public interface UserRegistrationApiSwaggerDoc {
@@ -14,6 +15,6 @@ public interface UserRegistrationApiSwaggerDoc {
     UserCreateResponseDto register(UserCreateDto userCreateDto);
 
     @Operation(summary = "Confirmation Registration")
-    UserResponseDto confirmRegistration(String code);
+    ResponseEntity<Void> confirmRegistration(String code);
 
 }

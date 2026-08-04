@@ -40,3 +40,5 @@ secrets.*
 application-*.local.properties
 
 
+
+.gradle-codex/

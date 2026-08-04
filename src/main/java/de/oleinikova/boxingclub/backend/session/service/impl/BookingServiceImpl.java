@@ -96,28 +96,12 @@ public class BookingServiceImpl implements BookingService {
                 );
             }
 
-            long count = bookingRepository
-                    .countBySession_IdAndCancelledFalse(trainingSession.getId());
+            validateTrainingOverlap(user, trainingSession);
 
-            if (trainingSession.getType() == SessionType.GROUP
-                    && count >= trainingSession.getMaxParticipants()) {
-
-                throw new RestApiException(
-                        HttpStatus.BAD_REQUEST,
-                        "Session is full"
-                );
-            }
-
-            if (trainingSession.getType() == SessionType.INDIVIDUAL
-                    && count >= 1) {
-
-                throw new RestApiException(
-                        HttpStatus.BAD_REQUEST,
-                        "Individual session already booked"
-                );
-            }
+            validateSessionCapacity(trainingSession);
 
             booking.setCancelled(false);
+            booking.setReminderSent(false);
             booking.setBookedAt(LocalDateTime.now());
 
             Booking saved = bookingRepository.save(booking);
@@ -125,26 +109,9 @@ public class BookingServiceImpl implements BookingService {
             return mapper.toResponseDto(saved);
         }
 
-        long count = bookingRepository
-                .countBySession_IdAndCancelledFalse(trainingSession.getId());
+        validateTrainingOverlap(user, trainingSession);
 
-        if (trainingSession.getType() == SessionType.GROUP
-                && count >= trainingSession.getMaxParticipants()) {
-
-            throw new RestApiException(
-                    HttpStatus.BAD_REQUEST,
-                    "Session is full"
-            );
-        }
-
-        if (trainingSession.getType() == SessionType.INDIVIDUAL
-                && count >= 1) {
-
-            throw new RestApiException(
-                    HttpStatus.BAD_REQUEST,
-                    "Individual session already booked"
-            );
-        }
+        validateSessionCapacity(trainingSession);
 
         Booking booking = new Booking();
 
@@ -194,10 +161,59 @@ public class BookingServiceImpl implements BookingService {
         AppUser user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(UserNotFoundException::new);
 
-        return bookingRepository.findAllByUser_IdAndCancelledFalse(user.getId())
+        return bookingRepository.findAllByUser_IdAndCancelledFalseOrderBySession_StartTimeDesc(user.getId())
                 .stream()
                 .map(mapper::toResponseDto)
                 .toList();
 
+    }
+
+    private void validateTrainingOverlap(AppUser user, TrainingSession trainingSession
+    ) {
+
+        List<Booking> userBookings = bookingRepository.findAllByUser_IdAndCancelledFalse(user.getId());
+
+        LocalDateTime newStart = trainingSession.getStartTime();
+        LocalDateTime newEnd = trainingSession.getEndTime();
+
+        for (Booking booking1 : userBookings) {
+
+            LocalDateTime existingStart = booking1.getSession().getStartTime();
+            LocalDateTime existingEnd = booking1.getSession().getEndTime();
+
+            boolean overlaps = newStart.isBefore(existingEnd) && newEnd.isAfter(existingStart);
+
+            if (overlaps) {
+                throw new RestApiException(
+                        HttpStatus.BAD_REQUEST,
+                        "You already have another training at this time"
+                );
+            }
+        }
+    }
+
+    private void validateSessionCapacity(TrainingSession trainingSession
+    )
+    {
+        long count = bookingRepository
+                .countBySession_IdAndCancelledFalse(trainingSession.getId());
+
+        if (trainingSession.getType() == SessionType.GROUP
+                && count >= trainingSession.getMaxParticipants()) {
+
+            throw new RestApiException(
+                    HttpStatus.BAD_REQUEST,
+                    "Session is full"
+            );
+        }
+
+        if (trainingSession.getType() == SessionType.INDIVIDUAL
+                && count >= 1) {
+
+            throw new RestApiException(
+                    HttpStatus.BAD_REQUEST,
+                    "Individual session already booked"
+            );
+        }
     }
 }

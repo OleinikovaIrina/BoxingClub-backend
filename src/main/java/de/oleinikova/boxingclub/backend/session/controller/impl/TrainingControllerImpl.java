@@ -76,6 +76,7 @@ public class TrainingControllerImpl implements TrainingApi {
     }
 
     @Override
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public TrainingSessionResponseDto updateTrainingSession(UUID sessionId, TrainingSessionUpdateRequestDto dto) {
         return trainingSessionService.updateTrainingSession(sessionId, dto);
     }
