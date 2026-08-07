@@ -36,4 +36,8 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
             LocalDateTime from,
             LocalDateTime to
     );
+
+    List<Booking> findAllByUser_IdAndCancelledFalseOrderBySession_StartTimeAsc(
+            UUID userId
+    );
 }

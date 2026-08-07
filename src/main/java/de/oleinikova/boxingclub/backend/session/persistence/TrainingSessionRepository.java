@@ -34,4 +34,6 @@ public interface TrainingSessionRepository extends JpaRepository<TrainingSession
     List<TrainingSession> findAllByCancelledFalseAndStartTimeAfterOrderByStartTimeAsc(LocalDateTime dateTime);
 
     boolean existsByTrainer_IdAndStartTime(UUID trainerId, LocalDateTime startTime);
+
+    boolean existsByTrainer_IdAndStartTimeAndCancelledFalse(UUID trainerId, LocalDateTime startTime);
 }

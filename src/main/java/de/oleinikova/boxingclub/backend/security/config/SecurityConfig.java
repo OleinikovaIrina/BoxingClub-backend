@@ -6,7 +6,6 @@ import de.oleinikova.boxingclub.backend.security.web.CustomAccessDeniedHandler;
 import de.oleinikova.boxingclub.backend.security.web.RestAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -45,6 +44,9 @@ public class SecurityConfig {
 
     @Value("${security.jwt.enabled:false}")
     private boolean jwtEnabled;
+
+    @Value("${app.cors.allowed-origin:http://localhost:5173}")
+    private String allowedOrigin;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -121,13 +123,11 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration cfg = new CorsConfiguration();
 
+        CorsConfiguration cfg = new CorsConfiguration();
         // Vite
-        cfg.setAllowedOriginPatterns(List.of(
-                "http://localhost:5173",
-                "https://*.onrender.com"
-        ));
+        cfg.setAllowedOrigins(List.of(allowedOrigin));
+
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         cfg.setExposedHeaders(List.of("Authorization"));

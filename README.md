@@ -1,170 +1,360 @@
 # BoxingClub Backend
 
-Spring Boot 3.5 based REST API for managing a boxing club.  
-Implements secure authentication, membership lifecycle management and role-based access control.
+REST API for managing a boxing club, built with Java 17 and Spring Boot 3.5.
 
-## Overview
+The application provides secure authentication, membership management, training scheduling, booking functionality, Telegram account linking, notifications and AI-based training advice.
 
-The system simulates real-world boxing club administration:
+## Project Status
 
-- User registration with email confirmation
-- Stateless JWT-based authentication
+The backend is fully implemented and tested locally.
+
+Production deployment is currently in preparation.
+
+Local backend URL:
+
+```text
+http://localhost:8081
+```
+
+## Main Features
+
+### Authentication and Security
+
+- User registration
+- Email confirmation
+- Stateless JWT authentication
 - Role-based authorization
-- Membership approval workflow
-- Password reset via email token
-- Administrative membership management
+- BCrypt password hashing
+- Password reset by email
+- Centralized exception handling
+- Protected API endpoints
 
-## 🚀 Live API (Production)
+Supported roles:
 
-Backend is deployed at:
+- `ROLE_USER`
+- `ROLE_ADMIN`
+- `ROLE_TRAINER`
 
-👉 https://boxingclub-backend.onrender.com
+### Membership Management
 
-### Health check
- /actuator/health
+Users can:
 
-### Example secured endpoint
- /api/memberships (requires JWT token)
+- create a membership request;
+- view their memberships;
+- cancel a membership.
 
-Note:
-The service may take a few seconds to start if inactive (free tier cold start).
+Administrators can:
+
+- view pending memberships;
+- approve membership requests;
+- reject membership requests;
+- view active memberships.
+
+Supported membership types:
+
+- `ADULT`
+- `CHILD`
+- `STUDENT`
+- `FAMILY`
+
+Supported durations:
+
+- `TRIAL`
+- `MONTHLY`
+- `YEARLY`
+
+Membership lifecycle:
+
+```text
+PENDING → APPROVED
+        → REJECTED
+        → CANCELLED
+```
+
+A membership is considered active when:
+
+- its status is `APPROVED`;
+- `startDate` and `endDate` are present;
+- the current date is within the membership period.
+
+The active state is calculated dynamically and is not stored as a separate database field.
+
+## Training Sessions
+
+Administrators can:
+
+- create training sessions;
+- edit training sessions;
+- cancel training sessions;
+- assign trainers;
+- configure session duration;
+- configure maximum participant capacity.
+
+Supported session types:
+
+- `GROUP`
+- `INDIVIDUAL`
+
+Business rules include:
+
+- sessions cannot be created in the past;
+- a trainer must have the `ROLE_TRAINER` authority;
+- trainer schedule overlaps are not allowed;
+- individual sessions can have only one participant;
+- cancelled sessions cannot be booked;
+- session capacity is checked before booking.
+
+## Booking Management
+
+Users with an active membership can:
+
+- view available future training sessions;
+- search sessions by training title;
+- search sessions by trainer;
+- filter sessions by type;
+- book available sessions;
+- view their upcoming bookings;
+- cancel their bookings.
+
+Booking rules include:
+
+- an active membership must be valid on the training date;
+- duplicate bookings are not allowed;
+- overlapping user bookings are not allowed;
+- group session capacity cannot be exceeded;
+- individual sessions can only be booked by one user;
+- cancelled bookings remain in the database;
+- booking cancellation is allowed only up to 24 hours before the training starts.
+
+Concurrency-sensitive booking operations use pessimistic locking and additional capacity validation.
+
+## Secure Telegram Linking
+
+The application supports secure linking between a website account and a Telegram account.
+
+Linking flow:
+
+1. The authenticated user requests a Telegram linking URL.
+2. The backend identifies the user from the JWT token.
+3. A cryptographically secure one-time token is generated.
+4. Only the SHA-256 hash of the token is stored in the database.
+5. The frontend opens the generated Telegram deep link.
+6. The Telegram bot receives `/start <token>`.
+7. The backend validates and consumes the token.
+8. The Telegram chat is linked to the authenticated website account.
+
+The frontend does not send an email address or user ID during the linking process.
+
+A Telegram account can be linked to only one BoxingClub user.
+
+### Create Telegram Link
+
+```http
+POST /api/user/telegram/link
+```
+
+The endpoint:
+
+- requires JWT authentication;
+- does not require a request body;
+- returns a Telegram deep link and expiration time.
+
+## Telegram Bot
+
+The Telegram bot supports commands for:
+
+- viewing available trainings;
+- viewing available slots;
+- searching by trainer;
+- viewing personal bookings;
+- booking a training;
+- receiving scheduled reminders.
+
+The bot uses an in-memory conversation state service based on `ConcurrentHashMap`.
+
+Telegram notifications are sent before scheduled training sessions.
+
+## AI Training Advice
+
+The backend includes an experimental AI integration for boxing-related training advice.
+
+The application sends user questions to the Groq API using Spring `WebClient` and returns the generated answer.
+
+### Endpoint
+
+```http
+POST /api/ai/training-advice
+```
+
+Example request:
+
+```json
+{
+  "question": "How can I improve my boxing stamina?"
+}
+```
+
+Example response:
+
+```json
+{
+  "answer": "Focus on interval training, jump rope sessions and structured sparring rounds."
+}
+```
+
+The Groq API key must be provided through an environment variable.
+
+Personalized AI recommendations are planned as a future improvement.
+
+## Demo Data
+
+The application contains an optional demo data initializer.
+
+It can create:
+
+- a demo user;
+- a demo administrator;
+- two demo trainers;
+- an active demo membership;
+- recurring training sessions for approximately three months.
+
+The initializer is enabled only when the following property is set:
+
+```properties
+app.demo-data.enabled=true
+```
+
+Existing demo users, memberships and training sessions are reused to prevent duplicate data during application restart.
 
 ## Architecture
 
 The project follows a layered architecture:
 
-- `controller.interfaces` – API contracts (Swagger documented)
-- `controller.impl` – REST controller implementations
-- `service.interfaces` – business contracts
-- `service.impl` – business logic
-- `persistence` – JPA repositories
-- `entity` – domain model
-- `dto` – request and response models
-- `security` – JWT configuration, filters, authentication setup
-- `exception` – centralized exception handling
+- `controller.interfaces` — API contracts;
+- `controller.impl` — REST controller implementations;
+- `service.interfaces` — service contracts;
+- `service.impl` — business logic;
+- `persistence` — Spring Data JPA repositories;
+- `entity` — domain entities;
+- `dto` — request and response models;
+- `security` — JWT configuration and authentication filters;
+- `exception` — centralized exception handling;
+- `telegram` — Telegram bot, linking and notification logic;
+- `config.demo` — optional demo data initialization.
 
-Controllers delegate business logic exclusively to services.  
-Business rules are isolated from HTTP concerns.
+Controllers delegate business logic to services.
 
-## Membership Workflow
-
-Membership lifecycle:
-
-
-PENDING → APPROVED / REJECTED → CANCELLED
-
-### Approval Process
-
-When an administrator approves a membership:
-
-- `status` changes to `APPROVED`
-- `startDate` is set to the current date
-- `endDate` is calculated based on selected duration:
-    - `TRIAL`
-    - `MONTHLY`
-    - `YEARLY`
-
-### Cancellation Process
-
-When a membership is cancelled:
-
-- `status` becomes `CANCELLED`
-- `endDate` is updated to the current date (if needed)
-
-### Active State
-
-The membership active state is not stored in the database.
-
-It is derived dynamically based on:
-
-- `status == APPROVED`
-- `startDate` and `endDate` are not null
-- Current date is within the subscription period (inclusive)
-
-## Security
-
-- Stateless JWT authentication
-- Role-based access control (`ROLE_ADMIN`, `ROLE_USER`)
-- Method-level authorization using `@PreAuthorize`
-- BCrypt password hashing
-- HS256 secure JWT token generation
-- Email confirmation token validation
-- Password reset token lifecycle management
-
-Example:
-
-`@PreAuthorize("hasAuthority('ROLE_ADMIN')")`
-
+Business rules are implemented in the service layer and are separated from HTTP concerns.
 
 ## Technology Stack
 
 - Java 17
 - Spring Boot 3.5
 - Spring Security
-- Spring Data JPA (Hibernate 6)
+- JWT
+- Spring Data JPA
+- Hibernate 6
 - MySQL 8
+- PostgreSQL for production deployment
 - MapStruct
 - Lombok
-- Mailtrap (development email testing)
+- Spring WebClient
+- Telegram Bots API
+- Groq API
 - Gradle
-
-## AI Training Advice Integration
-
-The backend includes an experimental AI integration that provides boxing training advice.
-
-Users can send a question about boxing training and the backend forwards the request to an external AI model using the Groq API.
-
-The service sends the request using Spring `WebClient`, processes the JSON response and returns the generated advice. AI API key must be provided via environment variable GROQ_API_KEY
-
-### Endpoint
-
-POST /api/ai/training-advice
-
-Example request:
-
-`
-{
-  "question": "How can I improve boxing stamina?"
-}
-`
-Example response:
-`
-{
-"answer": "Focus on interval training, jump rope sessions and sparring rounds."
-}
-`
+- JUnit
+- Mockito
 
 ## Environment Configuration
 
-Sensitive values are externalized via environment variables.
+Sensitive configuration values are externalized through environment variables.
 
-### Required variables:
+Typical required variables include:
 
-- JWT_SECRET
-- SPRING_DATASOURCE_URL
-- SPRING_DATASOURCE_USERNAME
-- SPRING_DATASOURCE_PASSWORD
-- MAIL_USERNAME
-- MAIL_PASSWORD
+```text
+JWT_SECRET
+SPRING_DATASOURCE_URL
+SPRING_DATASOURCE_USERNAME
+SPRING_DATASOURCE_PASSWORD
+MAIL_USERNAME
+MAIL_PASSWORD
+TELEGRAM_BOT_TOKEN
+TELEGRAM_BOT_USERNAME
+GROQ_API_KEY
+```
 
-## Profiles:
+The exact email variables depend on the active email profile.
 
+## Spring Profiles
+
+The project supports environment-specific Spring profiles.
+
+Examples:
+
+```text
 dev
 prod
+brevo
+```
 
-## Running the Application
+## Running Locally
+
+Start the application:
+
+```bash
 ./gradlew bootRun
+```
 
-Default development port: 8081
+Default local port:
+
+```text
+8081
+```
+
+Local API URL:
+
+```text
+http://localhost:8081
+```
+
+## Running Tests
+
+Run all backend tests:
+
+```bash
+./gradlew test
+```
 
 ## API Documentation
 
-Swagger UI is available at:
-/swagger-ui.html
+When the application is running locally, Swagger UI is available at:
 
-## Notes
+```text
+http://localhost:8081/swagger-ui.html
+```
 
-Passwords are stored using BCrypt hashing
-JWT tokens are validated on every secured request
-Business logic is enforced at the service layer
-Membership activity is dynamically calculated based on status and subscription period
+Health endpoint:
+
+```text
+http://localhost:8081/actuator/health
+```
+
+## Production Deployment
+
+Production deployment is in preparation.
+
+After deployment, this section will contain:
+
+- production backend URL;
+- production Swagger URL;
+- health-check URL;
+- frontend URL;
+- demo credentials.
+
+## Planned Improvements
+
+- add personalized AI training recommendations;
+- improve training and booking history presentation;
+- add attendance tracking;
+- optimize selected database queries;
+- complete production deployment and configuration.

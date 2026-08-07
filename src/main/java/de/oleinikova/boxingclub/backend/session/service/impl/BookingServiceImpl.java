@@ -40,6 +40,8 @@ public class BookingServiceImpl implements BookingService {
     private final TrainingSessionRepository trainingSessionRepository;
     private final BookingMapper mapper;
 
+    private static final int CANCELLATION_LIMIT_HOURS = 24;
+
     @Override
     @Transactional
     public BookingResponseDto createBooking(BookingCreateRequestDto dto, String email) {
@@ -138,34 +140,57 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public void cancelBooking(UUID bookingId, String email) {
 
-        AppUser user = userRepository.findByEmailIgnoreCase(email)
+        AppUser user = userRepository
+                .findByEmailIgnoreCase(email)
                 .orElseThrow(UserNotFoundException::new);
 
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(BookingNotFoundException::new);
+        Booking booking = bookingRepository
+                .findById(bookingId)
+                .orElseThrow(BookingNotFoundException::new);
 
         if (!user.getId().equals(booking.getUser().getId())) {
-            throw new RestApiException(HttpStatus.FORBIDDEN, "You can cancel only your own booking");
+            throw new RestApiException(
+                    HttpStatus.FORBIDDEN,
+                    "You can cancel only your own booking"
+            );
         }
 
         if (booking.isCancelled()) {
-            throw new RestApiException(HttpStatus.BAD_REQUEST, "Booking already cancelled");
+            throw new RestApiException(
+                    HttpStatus.BAD_REQUEST,
+                    "Booking already cancelled"
+            );
+        }
+
+        LocalDateTime cancellationDeadline = booking
+                .getSession()
+                .getStartTime()
+                .minusHours(CANCELLATION_LIMIT_HOURS);
+
+        if (LocalDateTime.now().isAfter(cancellationDeadline)) {
+            throw new RestApiException(
+                    HttpStatus.BAD_REQUEST,
+                    "Cancellation is available up to 24 hours before the training"
+            );
         }
 
         booking.setCancelled(true);
-
     }
 
     @Override
     public List<BookingResponseDto> getAllMyBookings(String email) {
 
-        AppUser user = userRepository.findByEmailIgnoreCase(email)
+        AppUser user = userRepository
+                .findByEmailIgnoreCase(email)
                 .orElseThrow(UserNotFoundException::new);
 
-        return bookingRepository.findAllByUser_IdAndCancelledFalseOrderBySession_StartTimeDesc(user.getId())
+        return bookingRepository
+                .findAllByUser_IdAndCancelledFalseOrderBySession_StartTimeAsc(
+                        user.getId()
+                )
                 .stream()
                 .map(mapper::toResponseDto)
                 .toList();
-
     }
 
     private void validateTrainingOverlap(AppUser user, TrainingSession trainingSession
@@ -193,8 +218,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void validateSessionCapacity(TrainingSession trainingSession
-    )
-    {
+    ) {
         long count = bookingRepository
                 .countBySession_IdAndCancelledFalse(trainingSession.getId());
 
