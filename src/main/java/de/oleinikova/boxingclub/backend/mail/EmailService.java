@@ -34,7 +34,12 @@ public class EmailService {
     public void sendHtmlMail(String to, String subject, String htmlBody) throws MessagingException {
 
         MimeMessage mime = mailSender.createMimeMessage();
+
+        mime.setHeader("X-Mailin-Track-Click", "0");
+        mime.setHeader("X-Mailin-Track-Open", "0");
+
         MimeMessageHelper helper = new MimeMessageHelper(mime, false,"UTF-8");
+
         helper.setFrom(from);
         helper.setTo(to);
         helper.setSubject(subject);

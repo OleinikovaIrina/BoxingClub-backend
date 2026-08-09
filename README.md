@@ -6,9 +6,35 @@ The application provides secure authentication, membership management, training 
 
 ## Project Status
 
-The backend is fully implemented and tested locally.
+The backend is deployed on Render and connected to a PostgreSQL production database.
 
-Production deployment is currently in preparation.
+Final production smoke testing is currently in progress.
+
+### Live Application
+
+Frontend:
+
+```text
+https://boxingclub-frontend.onrender.com
+```
+
+Backend API:
+
+```text
+https://boxingclub-backend.onrender.com
+```
+
+Health check:
+
+```text
+https://boxingclub-backend.onrender.com/actuator/health
+```
+
+Swagger UI:
+
+```text
+https://boxingclub-backend.onrender.com/swagger-ui.html
+```
 
 Local backend URL:
 
@@ -174,6 +200,8 @@ The bot uses an in-memory conversation state service based on `ConcurrentHashMap
 
 Telegram notifications are sent before scheduled training sessions.
 
+The Telegram bot can be enabled or disabled through an environment variable.
+
 ## AI Training Advice
 
 The backend includes an experimental AI integration for boxing-related training advice.
@@ -206,6 +234,20 @@ The Groq API key must be provided through an environment variable.
 
 Personalized AI recommendations are planned as a future improvement.
 
+## Email Delivery
+
+Transactional emails are sent through Brevo SMTP.
+
+Email functionality includes:
+
+- account confirmation emails;
+- password reset emails;
+- HTML email support;
+- configurable sender address;
+- environment-based SMTP credentials.
+
+Email confirmation links are valid for 90 minutes.
+
 ## Demo Data
 
 The application contains an optional demo data initializer.
@@ -224,7 +266,15 @@ The initializer is enabled only when the following property is set:
 app.demo-data.enabled=true
 ```
 
+On Render, the corresponding environment variable is:
+
+```text
+APP_DEMO_DATA_ENABLED=true
+```
+
 Existing demo users, memberships and training sessions are reused to prevent duplicate data during application restart.
+
+Demo data is currently disabled while final production testing is being completed.
 
 ## Architecture
 
@@ -240,6 +290,7 @@ The project follows a layered architecture:
 - `security` — JWT configuration and authentication filters;
 - `exception` — centralized exception handling;
 - `telegram` — Telegram bot, linking and notification logic;
+- `mail` — transactional email delivery;
 - `config.demo` — optional demo data initialization.
 
 Controllers delegate business logic to services.
@@ -254,47 +305,109 @@ Business rules are implemented in the service layer and are separated from HTTP 
 - JWT
 - Spring Data JPA
 - Hibernate 6
-- MySQL 8
-- PostgreSQL for production deployment
+- MySQL 8 for local development
+- PostgreSQL for production
 - MapStruct
 - Lombok
 - Spring WebClient
 - Telegram Bots API
 - Groq API
+- Brevo SMTP
 - Gradle
+- Docker
 - JUnit
 - Mockito
+- Render
 
 ## Environment Configuration
 
 Sensitive configuration values are externalized through environment variables.
 
-Typical required variables include:
+### Application and Profiles
 
 ```text
-JWT_SECRET
+SPRING_PROFILES_ACTIVE
+BACKEND_URL
+FRONTEND_URL
+```
+
+Production profile example:
+
+```text
+SPRING_PROFILES_ACTIVE=prod,brevo
+```
+
+### Database
+
+```text
 SPRING_DATASOURCE_URL
 SPRING_DATASOURCE_USERNAME
 SPRING_DATASOURCE_PASSWORD
-MAIL_USERNAME
-MAIL_PASSWORD
-TELEGRAM_BOT_TOKEN
+```
+
+### JWT
+
+```text
+JWT_SECRET
+JWT_ACCESS_EXP_MIN
+```
+
+### Brevo SMTP
+
+```text
+BREVO_SMTP_LOGIN
+BREVO_SMTP_KEY
+MAIL_FROM
+```
+
+`BREVO_SMTP_KEY` must contain only the SMTP key value.
+
+It must not contain the environment variable name or an API key.
+
+### Telegram
+
+```text
 TELEGRAM_BOT_USERNAME
+TELEGRAM_BOT_TOKEN
+TELEGRAM_BOT_ENABLED
+TELEGRAM_LINK_TOKEN_EXPIRATION_MINUTES
+```
+
+### AI Integration
+
+```text
 GROQ_API_KEY
 ```
 
-The exact email variables depend on the active email profile.
+### Demo Data
+
+```text
+APP_DEMO_DATA_ENABLED
+```
+
+### JVM Configuration
+
+The production deployment can use `JAVA_TOOL_OPTIONS` to configure JVM memory usage for the selected hosting instance.
+
+Secrets and credentials must never be committed to GitHub or GitLab.
 
 ## Spring Profiles
 
 The project supports environment-specific Spring profiles.
 
-Examples:
+Available profiles include:
 
 ```text
 dev
 prod
 brevo
+mailtrap
+```
+
+Production deployment uses:
+
+```text
+prod,brevo
 ```
 
 ## Running Locally
@@ -325,36 +438,88 @@ Run all backend tests:
 ./gradlew test
 ```
 
+Run a clean test build:
+
+```bash
+./gradlew clean test
+```
+
 ## API Documentation
 
-When the application is running locally, Swagger UI is available at:
+Local Swagger UI:
 
 ```text
 http://localhost:8081/swagger-ui.html
 ```
 
-Health endpoint:
+Production Swagger UI:
+
+```text
+https://boxingclub-backend.onrender.com/swagger-ui.html
+```
+
+Local health endpoint:
 
 ```text
 http://localhost:8081/actuator/health
 ```
 
+Production health endpoint:
+
+```text
+https://boxingclub-backend.onrender.com/actuator/health
+```
+
+Expected production health response:
+
+```json
+{
+  "status": "UP",
+  "groups": [
+    "liveness",
+    "readiness"
+  ]
+}
+```
+
 ## Production Deployment
 
-Production deployment is in preparation.
+The application is deployed on Render.
 
-After deployment, this section will contain:
+Production infrastructure:
 
-- production backend URL;
-- production Swagger URL;
-- health-check URL;
-- frontend URL;
-- demo credentials.
+- Render Web Service for the backend;
+- Render Static Site for the frontend;
+- Render PostgreSQL database;
+- Docker-based backend deployment;
+- Brevo SMTP for transactional email;
+- Groq API for AI training advice.
+
+Production URLs:
+
+```text
+Frontend:
+https://boxingclub-frontend.onrender.com
+
+Backend:
+https://boxingclub-backend.onrender.com
+
+Health:
+https://boxingclub-backend.onrender.com/actuator/health
+
+Swagger:
+https://boxingclub-backend.onrender.com/swagger-ui.html
+```
+
+The backend service uses the Render-provided `PORT` value automatically.
 
 ## Planned Improvements
 
 - add personalized AI training recommendations;
+- add AI tools for finding suitable sessions and creating bookings;
+- integrate the personalized AI service with Telegram;
 - improve training and booking history presentation;
 - add attendance tracking;
 - optimize selected database queries;
-- complete production deployment and configuration.
+- introduce database migrations with Flyway;
+- add additional integration and production tests.
