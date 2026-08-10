@@ -18,6 +18,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -40,6 +41,15 @@ public class DemoDataInitializer implements CommandLineRunner {
     private static final String TRAINER_TWO_EMAIL = "trainer2@test.com";
     private static final int DEMO_SCHEDULE_WEEKS = 13;
 
+    @Value("${DEMO_USER_PASSWORD}")
+    private String demoUserPassword;
+
+    @Value("${DEMO_ADMIN_PASSWORD}")
+    private String demoAdminPassword;
+
+    @Value("${DEMO_TRAINER_PASSWORD}")
+    private String demoTrainerPassword;
+
     private final AppUserRepository userRepository;
     private final TrainingSessionRepository trainingSessionRepository;
     private final MembershipRepository membershipRepository;
@@ -53,7 +63,7 @@ public class DemoDataInitializer implements CommandLineRunner {
                 "Demo",
                 "User",
                 USER_EMAIL,
-                "Password@1",
+                demoUserPassword,
                 Role.ROLE_USER
         );
 
@@ -62,7 +72,7 @@ public class DemoDataInitializer implements CommandLineRunner {
                 "Demo",
                 "Admin",
                 ADMIN_EMAIL,
-                "Password@2",
+                demoAdminPassword,
                 Role.ROLE_ADMIN
         );
 
@@ -70,7 +80,7 @@ public class DemoDataInitializer implements CommandLineRunner {
                 "Daniel",
                 "Fischer",
                 TRAINER_ONE_EMAIL,
-                "Password@3",
+                demoTrainerPassword,
                 Role.ROLE_TRAINER
         );
 
@@ -78,7 +88,7 @@ public class DemoDataInitializer implements CommandLineRunner {
                 "Anna",
                 "Weber",
                 TRAINER_TWO_EMAIL,
-                "Password@4",
+                demoTrainerPassword,
                 Role.ROLE_TRAINER
         );
 
